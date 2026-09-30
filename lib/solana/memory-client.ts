@@ -90,11 +90,11 @@ export class InMemoryChainClient implements ChainClient {
     return match ? this.readProofBySequence(Number(match[1])) : null;
   }
 
-  explorerUrl(): string | null {
+  explorerUrl(_signature: string): string | null {
     return null;
   }
 
-  accountUrl(): string | null {
+  accountUrl(_account: string): string | null {
     return null;
   }
 
