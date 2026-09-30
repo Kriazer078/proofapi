@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProofAPI Independent Verifier</title>
+<style>
+  :root { --bg: #f6f7f9; --card: #fff; --ink: #14161b; --muted: #5c6370; --line: #d9dde3; --ok: #0e6e4a; --bad: #b3261e; --accent: #2447d6; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1115; --card: #171a20; --ink: #e8eaee; --muted: #9aa1ad; --line: #2b3038; --ok: #4cc38a; --bad: #ff7a70; --accent: #8ea2ff; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 32px 16px; }
+  main { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+  h1 { margin: 0; font-size: 28px; line-height: 1.2; }
+  p { margin: 0; color: var(--muted); }
+  form { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; }
+  label { font-weight: 600; font-size: 14px; display: grid; gap: 6px; }
+  input[type=text] { font: 14px ui-monospace, Consolas, monospace; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  button { justify-self: start; font: 600 15px system-ui, sans-serif; padding: 11px 18px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: default; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #verdict { font-size: 22px; font-weight: 700; }
+  #verdict.ok { color: var(--ok); } #verdict.bad { color: var(--bad); }
+  ul { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
+  li:first-child { border-top: 0; }
+  li .m { font-weight: 700; } li.ok .m { color: var(--ok); } li.bad .m { color: var(--bad); }
+  li small { display: block; color: var(--muted); font: 12px ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Verify a ProofAPI evidence pack</h1>
+  <p>This page checks the pack directly against Solana. It never contacts ProofAPI, so you can save it and run it anywhere.</p>
+  <form id="form">
+    <label>Evidence pack (.json)<input id="pack" type="file" accept=".json,application/json" required></label>
+    <label>Solana RPC endpoint<input id="rpc" type="text" value="https://api.devnet.solana.com" required></label>
+    <button id="run" type="submit">Verify</button>
+  </form>
+  <section aria-live="polite">
+    <div id="verdict"></div>
+    <ul id="checks" hidden></ul>
+  </section>
+  <p>What this proves: the input, AI output and metadata are byte-for-byte what the issuer recorded on Solana at the shown time. It does not prove the AI answer is correct.</p>
+</main>
+<script>
+// CORE-START
+const ProofVerifierCore = (() => {
+  const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+  const RECORD_DISC = "ed3b9baccc75572c";
+  const RECORD_SIZE = 233;
+  const enc = new TextEncoder();
+
+  function base58Encode(bytes) {
+    let zeros = 0;
+    while (zeros < bytes.length && bytes[zeros] === 0) zeros++;
+    const digits = [];
+    for (let i = zeros; i < bytes.length; i++) {
+      let carry = bytes[i];
+      for (let j = 0; j < digits.length; j++) {
+        carry += digits[j] << 8;
+        digits[j] = carry % 58;
+        carry = (carry / 58) | 0;
+      }
+      while (carry > 0) {
+        digits.push(carry % 58);
+        carry = (carry / 58) | 0;
+      }
+    }
+    let out = "1".repeat(zeros);
+    for (let k = digits.length - 1; k >= 0; k--) out += ALPHABET[digits[k]];
+    return out;
+  }
+
+  const toHex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
+  const fromHex = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
+  const fromBase64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+  function concat(parts) {
+    const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+    let off = 0;
+    for (const p of parts) { out.set(p, off); off += p.length; }
+    return out;
+  }
+
+  async function sha256Hex(bytes) {
+    return toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)));
+  }
+
+  function uuidOf(b) {
+    const h = toHex(b);
+    return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  }
+
+  function formatProblem(p) {
+    if (!p || typeof p !== "object" || p.version !== "proofapi-evidence-v1") return "Not a proofapi-evidence-v1 file";
+    for (const k of ["program_id", "issuer", "proof_account", "proof_id", "salt", "output_json", "metadata_json"]) {
+      if (typeof p[k] !== "string" || !p[k]) return `Missing field ${k}`;
+    }
+    if (!/^[0-9a-f]{64}$/.test(p.salt)) return "Salt must be 64 hex characters";
+    if (typeof p.sequence !== "number" || !p.input || typeof p.input.content_base64 !== "string") return "Missing sequence or input";
+    return null;
+  }
+
+  async function verifyPack(pack, account) {
+    const problem = formatProblem(pack);
+    if (problem) return { status: "FAILED", checks: [{ id: "format", ok: false, detail: problem }] };
+    const checks = [{ id: "format", ok: true, detail: "Evidence pack v1" }];
+    if (!account) {
+      checks.push({ id: "account", ok: false, detail: `No account at ${pack.proof_account}` });
+      return { status: "NOT_ON_CHAIN", checks };
+    }
+    const d = account.data;
+    const add = (id, ok, detail) => checks.push({ id, ok, detail });
+    add("owner", account.owner === pack.program_id, `Account owner ${account.owner}`);
+    const shapeOk = d.length >= RECORD_SIZE && toHex(d.subarray(0, 8)) === RECORD_DISC;
+    add("type", shapeOk, shapeOk ? "ProofRecord account" : "Not a ProofRecord account");
+    if (!shapeOk) return { status: "FAILED", checks };
+
+    const seq = Number(new DataView(d.buffer, d.byteOffset + 40, 8).getBigUint64(0, true));
+    const ts = Number(new DataView(d.buffer, d.byteOffset + 224, 8).getBigInt64(0, true));
+    const onIssuer = base58Encode(d.subarray(8, 40));
+    add("issuer", onIssuer === pack.issuer, `Issuer ${onIssuer}`);
+    add("sequence", seq === pack.sequence, `Record #${seq}`);
+    add("proof_id", uuidOf(d.subarray(48, 64)) === pack.proof_id, `Proof ${uuidOf(d.subarray(48, 64))}`);
+
+    const salt = fromHex(pack.salt);
+    const pairs = [
+      ["input", fromBase64(pack.input.content_base64), 64],
+      ["output", enc.encode(pack.output_json), 96],
+      ["metadata", enc.encode(pack.metadata_json), 128],
+    ];
+    for (const [id, bytes, off] of pairs) {
+      const now = await sha256Hex(concat([salt, bytes]));
+      const onChain = toHex(d.subarray(off, off + 32));
+      add(id, now === onChain, now === onChain ? `SHA-256 ${onChain}` : `on Solana ${onChain}, pack gives ${now}`);
+    }
+
+    const recordNow = await sha256Hex(concat([enc.encode("proofapi-v1"), d.subarray(8, 192), d.subarray(224, 232)]));
+    add("record", recordNow === toHex(d.subarray(192, 224)), "Record hash recomputed from on-chain fields");
+    add("time", true, `Recorded ${new Date(ts * 1000).toISOString().replace(".000Z", " UTC").replace("T", " ")}`);
+
+    return { status: checks.every((c) => c.ok) ? "VERIFIED" : "FAILED", checks };
+  }
+
+  async function fetchAccount(rpcUrl, address) {
+    const res = await fetch(rpcUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "getAccountInfo", params: [address, { encoding: "base64", commitment: "confirmed" }] }),
+    });
+    if (!res.ok) throw new Error(`RPC answered ${res.status}`);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error.message);
+    const v = json.result && json.result.value;
+    return v ? { owner: v.owner, data: fromBase64(v.data[0]) } : null;
+  }
+
+  return { base58Encode, verifyPack, fetchAccount };
+})();
+// CORE-END
+
+const LABELS = { format: "Evidence pack", account: "Solana account", owner: "Owned by the ProofAPI program", type: "Account type", issuer: "Issuer", sequence: "Record number", proof_id: "Proof id", input: "Input unchanged", output: "AI output unchanged", metadata: "Metadata unchanged", record: "Record hash", time: "Time on Solana" };
+const $ = (id) => document.getElementById(id);
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const verdict = $("verdict");
+  const list = $("checks");
+  $("run").disabled = true;
+  verdict.className = "";
+  verdict.textContent = "Checking against Solana…";
+  list.hidden = true;
+  try {
+    const pack = JSON.parse(await $("pack").files[0].text());
+    const rpc = $("rpc").value.trim() || pack.rpc_url;
+    const account = pack && pack.proof_account ? await ProofVerifierCore.fetchAccount(rpc, pack.proof_account) : null;
+    const result = await ProofVerifierCore.verifyPack(pack, account);
+    verdict.textContent = { VERIFIED: "Verified", FAILED: "Verification failed", NOT_ON_CHAIN: "Not found on Solana" }[result.status];
+    verdict.className = result.status === "VERIFIED" ? "ok" : "bad";
+    list.replaceChildren(...result.checks.map((c) => {
+      const li = document.createElement("li");
+      li.className = c.ok ? "ok" : "bad";
+      const mark = document.createElement("span");
+      mark.className = "m";
+      mark.textContent = c.ok ? "✓" : "✗";
+      const body = document.createElement("div");
+      body.textContent = LABELS[c.id] || c.id;
+      const small = document.createElement("small");
+      small.textContent = c.detail;
+      body.append(small);
+      li.append(mark, body);
+      return li;
+    }));
+    list.hidden = false;
+  } catch (err) {
+    verdict.className = "bad";
+    verdict.textContent = `Could not verify: ${err.message}`;
+  } finally {
+    $("run").disabled = false;
+  }
+});
+</script>
+</body>
+</html>
