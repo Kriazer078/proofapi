@@ -1,89 +1,84 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useI18n } from "./i18n";
 import { Icon } from "./ui";
-
-const ORIGINAL = ["Contract review · NDA_Acme_v3.pdf", "Risk score        31 / 100", "Liability         no damages cap", "Termination       7 days notice", "Advice            negotiate a cap"];
-const EDITED = ORIGINAL.map((l) => l.replace("31 / 100", "12 / 100"));
 
 async function sha256(text: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** Hero demo: edit the AI answer and watch its fingerprint stop matching the one on Solana. Hashes are real SHA-256. */
+/** A 4-group code people can compare by eye, derived from the real SHA-256. */
+const sealCode = (hex: string) => (hex ? hex.slice(0, 16).toUpperCase().match(/.{4}/g)!.join(" ") : "···· ···· ···· ····");
+
+/** Edit the AI answer and watch its seal stop matching. Hashes are real SHA-256. */
 export function TamperDemo() {
-  const [edited, setEdited] = useState(false);
+  const { t } = useI18n();
+  const original = t.demo.lines;
+  const edited = original.map(([k, v]) => [k, v.replace("31 / 100", "12 / 100")] as [string, string]);
+  const [isEdited, setEdited] = useState(false);
   const [recorded, setRecorded] = useState("");
   const [current, setCurrent] = useState("");
+  const lines = isEdited ? edited : original;
+  const join = (ls: [string, string][]) => ls.map(([k, v]) => `${k}: ${v}`).join("\n");
 
   useEffect(() => {
-    sha256(ORIGINAL.join("\n")).then(setRecorded);
-  }, []);
+    sha256(join(original)).then(setRecorded);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
   useEffect(() => {
-    sha256((edited ? EDITED : ORIGINAL).join("\n")).then(setCurrent);
-  }, [edited]);
+    sha256(join(lines)).then(setCurrent);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdited, t]);
 
   const match = recorded !== "" && recorded === current;
-  const lines = edited ? EDITED : ORIGINAL;
 
   return (
-    <div className="ring-sol relative rounded-2xl bg-panel/90 p-5 shadow-2xl shadow-black/40 backdrop-blur sm:p-6">
-      <div className="flex items-center justify-between text-xs text-faint">
-        <span className="font-mono">record #42 · example</span>
-        <span className="font-mono">solana devnet</span>
+    <div className="grid gap-6 md:grid-cols-[1.2fr_1fr] md:items-center">
+      <div className="rounded-2xl border border-line bg-panel/80 p-5">
+        <div className="text-xs font-medium text-faint">{t.demo.label}</div>
+        <dl className="mt-3 grid gap-2 text-[15px]">
+          {lines.map(([k, v], i) => {
+            const changed = v !== original[i][1];
+            return (
+              <div key={k} className={`grid grid-cols-[minmax(0,11rem)_1fr] gap-3 rounded-md px-2 py-1 transition-colors ${changed ? "bg-bad/15" : ""}`}>
+                <dt className="text-muted">{k}</dt>
+                <dd className={changed ? "font-semibold text-bad" : "text-fg"}>{v}</dd>
+              </div>
+            );
+          })}
+        </dl>
+        <button
+          type="button"
+          onClick={() => setEdited((v) => !v)}
+          className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-line-strong text-sm font-medium transition-colors hover:bg-white/[0.06]"
+        >
+          <Icon name={isEdited ? "refresh" : "edit"} />
+          {isEdited ? t.demo.restore : t.demo.fake}
+        </button>
       </div>
-
-      <div className="mt-4 overflow-x-auto whitespace-pre rounded-xl border border-line bg-bg/60 p-4 font-mono text-[13px] leading-6">
-        {lines.map((line, i) => {
-          const changed = line !== ORIGINAL[i];
-          return (
-            <div key={i} className={i === 0 ? "text-fg" : changed ? "-mx-1 rounded bg-bad/15 px-1 text-bad" : "text-muted"}>
-              {line}
-            </div>
-          );
-        })}
-      </div>
-
-      <dl className="mt-4 grid gap-2 text-xs">
-        <div className="grid grid-cols-[88px_1fr] items-baseline gap-3">
-          <dt className="text-faint">On Solana</dt>
-          <dd className="font-mono text-muted break-all">{recorded.slice(0, 40) || "…"}</dd>
-        </div>
-        <div className="grid grid-cols-[88px_1fr] items-baseline gap-3">
-          <dt className="text-faint">Right now</dt>
-          <dd className="font-mono break-all">
-            {current.slice(0, 40).split("").map((c, i) => (
-              <span key={i} className={recorded[i] === c ? "text-muted" : "text-bad"}>
-                {c}
-              </span>
-            ))}
-          </dd>
-        </div>
-      </dl>
 
       <div
         key={String(match)}
-        className={`mt-5 flex items-center gap-3 rounded-xl border px-4 py-3 ${match ? "border-ok/25 bg-ok/[0.07]" : "border-bad/30 bg-bad/[0.08] animate-shake"}`}
         role="status"
+        className={`flex flex-col items-center rounded-2xl border px-6 py-8 text-center ${match ? "border-ok/25 bg-ok/[0.06]" : "animate-shake border-bad/30 bg-bad/[0.07]"}`}
       >
-        <span className={`grid size-8 shrink-0 place-items-center rounded-full ${match ? "bg-ok text-bg" : "bg-bad text-bg"}`}>
-          <Icon name={match ? "check" : "x"} className="size-4" />
+        <span className={`grid size-14 place-items-center rounded-full ${match ? "bg-ok text-bg" : "bg-bad text-bg"}`}>
+          <Icon name={match ? "check" : "x"} className="size-7" />
         </span>
-        <div>
-          <div className={`text-sm font-semibold ${match ? "text-ok" : "text-bad"}`}>{match ? "Verified" : "Changed after recording"}</div>
-          <div className="text-xs text-muted">{match ? "Matches the fingerprint on Solana." : "The risk score was edited. The fingerprint no longer matches."}</div>
+        <div className={`mt-4 text-lg font-semibold ${match ? "text-ok" : "text-bad"}`}>{match ? t.demo.ok : t.demo.bad}</div>
+        <div className="mt-5 grid w-full gap-1.5 font-mono text-sm">
+          <div className="flex justify-between gap-3 text-muted">
+            <span>{t.demo.seal}</span>
+            <span>{sealCode(recorded)}</span>
+          </div>
+          <div className={`flex justify-between gap-3 ${match ? "text-muted" : "text-bad"}`}>
+            <span>{t.cert.now}</span>
+            <span>{sealCode(current)}</span>
+          </div>
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={() => setEdited((v) => !v)}
-        className="mt-4 inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-line-strong text-sm font-medium text-fg transition-colors hover:bg-white/[0.06]"
-      >
-        <Icon name={edited ? "refresh" : "edit"} />
-        {edited ? "Restore the original" : "Try to fake it: change 31 → 12"}
-      </button>
     </div>
   );
 }

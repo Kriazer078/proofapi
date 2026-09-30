@@ -10,5 +10,11 @@ export default async function ProofPage({ params }: { params: Promise<{ id: stri
   const { repo, chain } = getServices();
   const row = await repo.get(id);
   if (!row) notFound();
-  return <ProofView initial={toPublicProof(row, chain)} liveChain={chain.mode === "anchor"} />;
+  return (
+    <ProofView
+      initial={toPublicProof(row, chain)}
+      liveChain={chain.mode === "anchor"}
+      issuerName={process.env.ISSUER_NAME ?? "ProofAPI Demo"}
+    />
+  );
 }
