@@ -9,7 +9,12 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "db:push": "prisma db push",
-    "db:reset": "prisma db push --force-reset"
+    "db:reset": "prisma db push --force-reset",
+    "setup": "tsx scripts/setup-keys.ts",
+    "register-issuer": "tsx scripts/register-issuer.ts",
+    "issuer:active": "tsx scripts/set-active.ts",
+    "chain:status": "tsx scripts/chain-status.ts",
+    "e2e:devnet": "tsx scripts/e2e-devnet.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -26,6 +31,7 @@
     "@types/react-dom": "^19.3.0",
     "prisma": "^6.19.3",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^3.2.7"
   }
