@@ -1,1 +1,90 @@
 @import "tailwindcss";
+
+/* ProofAPI — dark, precise, Linear/Vercel-like. Solana's purple→green is used only for brand moments. */
+@theme {
+  --color-bg: #07080b;
+  --color-panel: #0d0f14;
+  --color-panel-2: #12151c;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-strong: rgb(255 255 255 / 0.13);
+  --color-fg: #eef0f4;
+  --color-muted: #8d93a0;
+  --color-faint: #5b616d;
+  --color-sol-purple: #9945ff;
+  --color-sol-green: #14f195;
+  --color-ok: #2fe39a;
+  --color-bad: #ff5a64;
+  --color-warn: #f5b544;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jbmono), ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-shake: shake 0.45s ease-in-out;
+  --animate-draw: draw 0.9s cubic-bezier(0.65, 0, 0.35, 1) both;
+  --animate-flow: flow 2.4s linear infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes flow {
+    from { background-position: 0 0; }
+    to { background-position: 48px 0; }
+  }
+}
+
+html { color-scheme: dark; }
+body { background: var(--color-bg); color: var(--color-fg); font-feature-settings: "cv11", "ss01"; }
+::selection { background: rgb(153 69 255 / 0.4); }
+:focus-visible { outline: 2px solid var(--color-sol-green); outline-offset: 2px; border-radius: 6px; }
+
+/* Brand moments: the logo mark and the one primary action */
+.bg-sol { background: linear-gradient(92deg, var(--color-sol-purple), var(--color-sol-green)); }
+
+/* Page atmosphere: one soft glow at the top, a faint grid that fades out */
+.atmosphere { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.atmosphere::before {
+  content: ""; position: absolute; left: 50%; top: -420px; width: 1100px; height: 700px; transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgb(153 69 255 / 0.22), rgb(20 241 149 / 0.06) 55%, transparent 75%);
+  filter: blur(10px);
+}
+.atmosphere::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(var(--color-line) 1px, transparent 1px), linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black 0%, transparent 70%);
+  opacity: 0.55;
+}
+
+/* Hairline gradient border for the one hero object on a page */
+.ring-sol { position: relative; }
+.ring-sol::before {
+  content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(140deg, rgb(153 69 255 / 0.7), rgb(255 255 255 / 0.08) 40%, rgb(20 241 149 / 0.6));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+
+/* Animated link between chain blocks */
+.chain-link { background-image: repeating-linear-gradient(90deg, rgb(20 241 149 / 0.7) 0 10px, transparent 10px 24px); background-size: 48px 2px; animation: var(--animate-flow); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
