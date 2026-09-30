@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Proof {
+  id                 String   @id
+  mode               String
+  salt               String?
+  inputBlob          Bytes?
+  inputFileName      String?
+  inputText          String?
+  outputJson         String?
+  metadataJson       String?
+  inputHash          String
+  outputHash         String
+  metadataHash       String
+  provider           String?
+  model              String?
+  status             String
+  sequence           Int?
+  account            String?
+  solanaTransaction  String?
+  recordHash         String?
+  prevRecordHash     String?
+  chainTimestamp     Int?
+  agentId            String?
+  toolName           String?
+  actionType         String?
+  externalApi        String?
+  parentProofId      String?
+  tamperedBackupJson String?
+  createdAt          DateTime
+}
