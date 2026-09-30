@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::hash::hashv;
 
 // Solana Playground replaces this with the deployed program id on Build.
-declare_id!("11111111111111111111111111111111");
+declare_id!("5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU");
 
 #[program]
 pub mod proof_registry {
