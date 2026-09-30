@@ -1699,7 +1699,7 @@ describe("verifyProof", () => {
     expect(r.status).toBe("VERIFIED");
     expect(Object.values(r.checks).every((c) => c.ok)).toBe(true);
     expect(r.checks.chain.sequence).toBe(0);
-    expect(r.onChainTimestamp).toBe(1790000000);
+    expect(r.onChainTimestamp).toBe(1790000001); // tick 0 registers the issuer
   });
 
   it("fails on output when the AI response is modified", async () => {
