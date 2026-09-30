@@ -1,167 +1,153 @@
-# ProofAPI MVP — UX Design
+# ProofAPI MVP — UX Design (v2, основано на исследовании)
 
 **Дата:** 2026-09-30
 **Связано:** [спецификация v2](2026-09-30-proofapi-mvp-design.md)
+**Порядок работы:** UX (этот документ) → дизайн-система → UI-прототип → код.
 
-## 1. Для кого и какая задача
+## 1. Исследование: что уже работает у других
 
-| Персона | Контекст | Главная задача (JTBD) | Критерий успеха |
+Разобраны продукты, которые решают похожую задачу — показать человеку, что данные подлинные.
+
+| Продукт | Что делает хорошо | Что берём |
+|---|---|---|
+| **Content Credentials Verify** (C2PA, Adobe и партнёры) — проверено вживую | Одна задача на странице: слева заголовок и объяснение, справа большая зона для файла со списком форматов. **Честное предупреждение на первом экране**, что информации может не оказаться. Переключатель языка, есть русский | Отдельный экран Verify с одной зоной для файла; предупреждение о границах проверки — сразу, а не мелким шрифтом |
+| **OpenTimestamps** | Подчёркивает, что **хэш считается в браузере, файл никуда не уходит**. Явно показывает промежуточный статус «ожидает подтверждения» | Фраза о приватности у зоны загрузки; честный статус «ожидает» |
+| **DocuSign Certificate of Completion** | Главный артефакт доверия — **сертификат**: участники, время событий, цепочка действий. Его отдают юристам и в суд | **Сертификат proof** — страница для печати и PDF, понятная юристу |
+| **Solana Explorer, Solscan** | Статус транзакции и три уровня подтверждения: processed → confirmed → finalized | Показываем уровень подтверждения записи честно: «Confirmed» сразу, «Finalized» — когда запись окончательно необратима |
+| **Vanta Trust Center** | Покупатель сам находит нужные доказательства, без переписки с продавцом | Публичная ссылка на proof проверяется без регистрации и без писем издателю |
+| **NN/g: доверие в веб-дизайне** | Четыре фактора: качество дизайна, раскрытие заранее, полный и актуальный контент, связь с внешними источниками | Раздел «Что мы не доказываем» на виду; ссылки в Solana Explorer как внешняя опора |
+| **NN/g: сообщения об ошибках** | Видимость рядом с источником, конструктивный текст, быстрый путь к исправлению | Каждая ошибка: что случилось + что сделать, у того места, где случилось |
+
+Источники: [Content Credentials Verify](https://verify.contentauthenticity.org/), [OpenTimestamps](https://opentimestamps.org/), [DocuSign Certificate of Completion — обзор](https://www.notasign.com/blog/docusign-certificate-of-completion-audit-trail), [Helius: как отслеживать транзакции Solana](https://www.helius.dev/docs/orb/explore-transactions), [Vanta Trust Center](https://help.vanta.com/hc/en-us/articles/6692930140436-Vanta-Trust-Center), [NN/g: Communicating Trustworthiness](https://www.nngroup.com/articles/communicating-trustworthiness/), [NN/g: Error-Message Guidelines](https://www.nngroup.com/articles/error-message-guidelines/). Проверено 2026-09-30.
+
+**Ограничение:** интервью и юзабилити-тесты с реальными пользователями ещё не проводились. Персоны ниже — гипотезы. План теста — в разделе 11.
+
+## 2. Персоны и задачи (JTBD)
+
+| Персона | Когда приходит | Задача | Успех |
 |---|---|---|---|
-| **Издатель** — разработчик или продакт в AI-компании | Встраивает ProofAPI и пробует через UI | «Хочу записать результат AI так, чтобы его нельзя было незаметно изменить» | Первый proof за < 30 секунд, без документации |
-| **Проверяющий** — клиент, аудитор, юрист | Получил ссылку на proof | «Этот результат AI настоящий?» | Ответ за 3 секунды, без технических знаний |
-| **Судья хакатона** | 3–5 минут на проект | «Что это и работает ли?» | Понимает ценность за 60 секунд демо |
+| **Издатель** — разработчик или продакт команды AI-агентов | Встраивает ProofAPI; пробует через UI | «Хочу, чтобы каждое действие моего AI можно было проверить без меня» | Первый proof < 30 с; понял, как это выглядит в API |
+| **Получатель** — клиент, аудитор, юрист | Получил ссылку или файл доказательства | «Этот результат AI настоящий? Могу ли я это доказать дальше?» | Вердикт за 3 с; может скачать сертификат для своих юристов |
+| **Судья хакатона** | 3–5 минут на проект, смотрит видео и демо | «Что это, работает ли, зачем Solana?» | Понял ценность за 60 с; прошёл демо без подсказок |
 
-## 2. Принципы (как в больших продуктах)
+## 3. Принципы UX (каждый опирается на раздел 1)
 
-1. **Сначала ответ, потом детали.** Вердикт — первое и самое крупное на экране. Хэши и транзакции спрятаны в «Technical details» (прогрессивное раскрытие).
-2. **Одно главное действие на экран.** Одна тёмная (primary) кнопка, остальные вторичные.
-3. **Простой язык.** «AI output was changed after it was recorded», а не «output_hash mismatch».
-4. **Нулевое трение на старте.** Кнопка «Try the sample contract» — proof без своего файла.
-5. **Каждое действие даёт мгновенную обратную связь:** шаги прогресса, «Copied», понятные ошибки с тем, что делать дальше.
-6. **Честность — часть доверия.** Везде видно, что AI в демо — mock, модель «заявлена издателем», и что именно мы не доказываем.
-7. **Режим демо отделён от продукта.** Кнопки «атаки» (подмена, удаление) в отдельной панели с пунктирной рамкой и подписью «Demo».
-8. **Никогда не блокируем пользователя из-за блокчейна.** Если Solana недоступна, proof сохранён, есть статус «Not on Solana yet» и кнопка повтора.
-9. **Доступность:** контраст AA, фокус с клавиатуры, `role="status"` у вердикта, цвет всегда дублируется иконкой и текстом.
-10. **Адаптивность:** всё работает на ширине 375 px.
+1. **Вердикт первым.** Одна крупная фраза простым языком; технические детали — по запросу (прогрессивное раскрытие).
+2. **Одна задача — один экран.** Создать, проверить, посмотреть историю — отдельные экраны с одним главным действием (Content Credentials Verify).
+3. **Границы честно и заранее.** «Что мы не доказываем» — на лендинге и на каждой странице proof (NN/g: раскрытие заранее; C2PA: предупреждение на первом экране).
+4. **Приватность вслух.** У каждой зоны загрузки: «хэш считается в браузере» или «в блокчейн уходят только солёные отпечатки» (OpenTimestamps).
+5. **Честные статусы.** Pending → Confirmed → Finalized; никогда не показываем «Verified» раньше, чем проверка реально прошла (Solana, OpenTimestamps).
+6. **Доказательство можно унести.** Ссылка, Evidence Pack и **сертификат для печати** (DocuSign).
+7. **Внешняя опора.** Ссылка в Solana Explorer рядом с каждым вердиктом (NN/g: связь с внешними источниками).
+8. **Ошибка = что случилось + что сделать**, рядом с местом ошибки (NN/g).
+9. **Два вида одного proof.** Издатель видит управление и демо-атаки; получатель по ссылке — только вердикт, проверки, детали, сертификат.
+10. **Демо отделено от продукта.** Guided demo и панель атак явно помечены; есть «Reset demo».
+11. **Доступность:** WCAG AA по контрасту, цвет всегда дублируется иконкой и текстом, всё работает с клавиатуры, `role="status"` у вердикта.
+12. **Язык:** интерфейс на английском (судьи); тексты вынесены так, чтобы добавить русский без переделки (C2PA Verify поддерживает много языков).
 
-## 3. Информационная архитектура
+## 4. Информационная архитектура
 
 ```
-Верхняя навигация:  [P] ProofAPI      Create proof   History    (●) Local simulation | Solana devnet
+Навигация:  ProofAPI    Create proof    Verify    History         [Local simulation | Solana devnet]
+Полоса Guided demo (только в демо-режиме): 1 Create → 2 Change output → 3 Delete record → 4 Verify independently   [Reset demo]
 
-/                 Лендинг: ценность → как работает → гарантии и границы → CTA
-/new              Создать proof: файл → анализ → запись → результат
-/proof/[id]       Страница proof: вердикт → проверки → детали → панель демо
-/history          История издателя: сводка → записи по номерам → проблемы
-/verifier.html    Независимый верификатор (план B): файл Evidence Pack → вердикт
+/                      Лендинг
+/new                   Создать proof (издатель)
+/proof/[id]            Proof — вид издателя (управление, демо-атаки)
+/p/[id]                Proof — публичный вид получателя
+/p/[id]/certificate    Сертификат для печати / PDF
+/verify                Проверить: ссылка или Evidence Pack (независимо, в браузере)
+/history               История издателя и аудит цепочки
 ```
 
-## 4. Главные сценарии
+## 5. Сценарии
 
-### 4.1. Первый proof (издатель)
-1. `/` → «Create your first proof».
-2. `/new` → «Try the sample contract» (или перетащить файл).
-3. «Analyze & create proof» → шаги: Analyze with AI → Hash with a secret salt → Record on Solana.
-4. Карточка результата: «Proof #3 recorded», риск 31/100, найденные проблемы, кнопки **Open proof page** (primary), Copy share link, Create another.
+### 5.1. Издатель: первый proof
+Лендинг → «Try it in 30 seconds» → `/new` → «Try the sample contract» → «Analyze & create proof» → шаги (Analyze → Hash → Record) → карточка результата: номер, риск, **пример API-запроса**, кнопки Open proof / Copy share link.
 
-### 4.2. Проверка по ссылке (проверяющий)
-1. Открывает `/proof/[id]`.
-2. Сразу видит крупный вердикт: зелёный **Verified** или красный **Verification failed** и одно предложение о том, что это значит.
-3. При желании смотрит список проверок и раскрывает технические детали.
+### 5.2. Получатель: проверка по ссылке
+Открывает `/p/[id]` → вердикт → (по желанию) проверки и технические детали → **«Download certificate»** для юристов или **«Verify independently»** → `/verify` с Evidence Pack.
 
-### 4.3. Демо атаки (судья)
-1. На странице proof: панель «Demo: simulate an attack» → **Change the AI output** → вердикт краснеет: «The AI output was changed after it was recorded».
-2. **Restore original** → снова зелёный.
-3. **Delete this record from the database** → подтверждение в самой панели → переход в `/history`, запись подсвечена: «Record #3 is on Solana, but its data was deleted from the database».
+### 5.3. Получатель без ссылки: независимая проверка
+`/verify` → бросает `proofapi-evidence-N.json` → проверка в браузере прямо через Solana → вердикт + «ProofAPI не участвовал в проверке».
 
-## 5. Экраны
+### 5.4. Судья: guided demo (≤ 60 с)
+1 Create → 2 «Change the AI output» (красный вердикт) → 3 «Delete record» (разрыв в истории) → 4 «Verify independently» (проверка без нашего сервера) → «Reset demo».
 
-### 5.1. Лендинг `/`
-```
-┌──────────────────────────────────────────────────────────┐
-│  Git history for AI.                                      │
-│  Record what your AI received and returned. Anyone can    │
-│  verify it hasn't changed — without trusting you or us.   │
-│  [Create your first proof]   [See the history]            │
-├──────────────────────────────────────────────────────────┤
-│  1 Upload      2 AI answers      3 Fingerprints on Solana │
-├──────────────────────────────────────────────────────────┤
-│  What we guarantee            │  What we don't prove      │
-│  ✓ Not changed after recording│  – That the issuer told   │
-│  ✓ Can't be backdated         │    the truth at recording │
-│  ✓ No hidden deletions        │  – Which model really ran │
-│  ✓ Signed by a known issuer   │  – Legal admissibility    │
-└──────────────────────────────────────────────────────────┘
-```
+### 5.5. Сбой Solana
+Создание → шаг «Record on Solana» с ошибкой → карточка «Saved — not on Solana yet» + «Retry» → после повтора запись получает номер.
 
-### 5.2. Создание `/new`
-```
-Create a proof                                   [Demo AI (mock)]
-Upload a document. We'll analyze it and record a tamper-evident proof.
+## 6. Экраны: содержание и приоритеты
 
-┌──────────── 3/5 ────────────┐  ┌──────── 2/5 ────────┐
-│  ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐  │  │ What happens        │
-│    Drop a PDF or TXT here    │  │ ① Analyze with AI   │
-│  │ or click to choose      │  │  │ ② Hash with salt    │
-│    Up to 5 MB                │  │ ③ Record on Solana  │
-│  └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘  │  └─────────────────────┘
-│  No file? [Try the sample contract]
-│  [Analyze & create proof]    │
-└──────────────────────────────┘
-```
-Состояния: пусто → файл выбран (имя, размер, «Remove») → в работе (шаги оживают, кнопка заблокирована) → успех (карточка результата) → ошибка (красный блок с текстом ошибки, кнопка «Try again»).
+Для каждого экрана — что видно первым (P1), вторым (P2) и по запросу (P3).
 
-### 5.3. Страница proof `/proof/[id]`
-```
-History › Proof #3
-┌──────────────────────────────────────────────────────────┐
-│ ✓  Verified                                               │
-│    This AI result hasn't changed since it was recorded    │
-│    on 30 Sep 2026, 14:03 UTC.                             │
-└──────────────────────────────────────────────────────────┘
-[Copy share link] [Download evidence] [Open independent verifier] [Re-verify]
+| Экран | P1 | P2 | P3 |
+|---|---|---|---|
+| Лендинг | Что это и для кого (история спора: решение → подмена → проверка краснеет); CTA «Try it in 30 seconds» | Кому полезно (агенты, страхование, финтех); превью продукта | Гарантии и границы; как это выглядит в API |
+| /new | Зона файла + «Try the sample contract»; главная кнопка | Шаги процесса справа | Демо-переключатель «simulate a Solana outage» |
+| /proof/[id] | Вердикт | Проверки (по очереди, с анимацией); результат AI; детали; место в истории | Технические хэши; панель демо-атак |
+| /p/[id] | Вердикт + кто издатель | Проверки; детали; сертификат | Технические хэши; «Verify independently» |
+| /verify | Две опции: ссылка / файл доказательства; фраза о независимости | Результат проверки | Источник данных (RPC, аккаунт) |
+| /history | Сводка: «все целы» или «N проблем» | Записи по номерам, связанные цепочкой; объяснение каждой проблемы | Адрес издателя, pending-записи |
+| Сертификат | Заголовок «Proof certificate», вердикт на момент печати | Таблица: издатель, номер, время, хэши, транзакция, ссылка проверки | Как проверить самостоятельно (3 шага) |
 
-┌──── Checks (2/3) ─────────────────┐ ┌── Details (1/3) ──────┐
-│ ✓ Document        Unchanged       │ │ Record     #3          │
-│ ✓ AI output       Unchanged       │ │ Recorded   30 Sep 14:03│
-│ ✓ Metadata        Unchanged       │ │ Issuer     7xKq…9fA   │
-│ ✓ Record integrity Consistent     │ │ Model      proofapi-…  │
-│ ✓ History         Linked to #2    │ │            declared    │
-│ ✓ Issuer          Expected issuer │ │ Transaction ↗          │
-│ ▸ Technical details               │ └────────────────────────┘
-└───────────────────────────────────┘
-┌──── AI result ────────────────────┐
-│ 31 / 100 risk  ███░░░░░░          │
-│ Termination clause · Liability …  │
-└───────────────────────────────────┘
-┌ ─ ─ Demo: simulate an attack ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
-  [Change the AI output] [Restore original] [Delete record…]
-└ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
-```
+## 7. Матрица состояний
 
-### 5.4. История `/history`
-```
-History
-Every proof your issuer has recorded, in order. Gaps and edits show up here.
-┌──────────────────────────────────────────────────────────┐
-│ ✕ 1 problem found in 4 records          Issuer 7xKq…9fA ⧉ │
-└──────────────────────────────────────────────────────────┘
- #0  sample-contract.txt        30 Sep 14:01   ✓ Intact     View
- #1  sample-contract.txt        30 Sep 14:02   ✕ Data changed View
-     The stored data no longer matches the fingerprint on Solana.
- #2  — deleted —                30 Sep 14:02   ✕ Deleted
-     This record is on Solana, but its data was deleted from the database.
- #3  Hash-only proof            30 Sep 14:03   ● Hash only   View
-```
-Пустое состояние: «No proofs yet — Create your first proof» с primary-кнопкой.
+| Экран | Пусто | Загрузка | Ошибка | Успех | Особые |
+|---|---|---|---|---|---|
+| /new | Зона файла | Шаги оживают, кнопка «Creating proof…» | Текст ошибки у зоны + «Try again» | Карточка результата | Pending (Solana недоступна) |
+| /proof, /p | — | Вердикт «Verifying against Solana…», проверки по очереди | «Couldn't reach the server…» + Re-verify | Verified | Failed (что изменилось); Not on Solana yet; Not found |
+| /verify | Две опции | «Checking against Solana…» | Файл не того формата / ссылка не найдена — у поля | Verified / Failed | Запись ещё не finalized |
+| /history | «No proofs yet» + CTA | Скелетон | Ошибка загрузки | «All N records intact» | Проблемы подсвечены; pending-записи |
 
-## 6. Тексты интерфейса (главные)
+## 8. Тексты (ключевые)
 
 | Место | Текст |
 |---|---|
+| Hero лендинга | **Prove what your AI decided.** When a customer disputes an AI decision, show exactly what the AI saw and answered. The record lives on Solana, so nobody — not even you — can quietly change it later. |
 | Verified | **Verified** — This AI result hasn't changed since it was recorded on {date}. |
-| Failed (output) | **Verification failed** — The AI output was changed after it was recorded. |
-| Failed (несколько) | **Verification failed** — The document and the AI output were changed after they were recorded. |
-| Failed (chain) | **Verification failed** — This record doesn't link correctly to the previous one in the history. |
-| Failed (issuer) | **Verification failed** — This record was written by an unexpected issuer. |
-| Not on chain | **Not on Solana yet** — We saved this proof but couldn't record it on Solana. Retry to finish. |
-| Модель | {model} · *declared by the issuer* |
-| Mock AI | Demo AI (mock) |
-| Ошибка сети | Couldn't reach the server. Check your connection and try again. |
+| Failed | **Verification failed** — The AI output was changed after it was recorded. |
+| Verifying | **Verifying against Solana…** — Recomputing fingerprints and reading the record on-chain. |
+| Pending | **Saved — not on Solana yet.** We couldn't reach Solana. Your proof is saved; it gets its number once it's recorded. |
+| Приватность (/new) | Only salted fingerprints go on-chain. |
+| Приватность (/verify) | Runs in your browser and talks to Solana directly. ProofAPI's servers aren't contacted. |
+| Модель | {model} · declared by the issuer |
+| Демо-панель | These buttons edit our database like a dishonest insider would. Solana stays untouched. Recipients never see this panel. |
 
-## 7. Визуальное направление
+## 9. Доступность
 
-- Спокойный «финтех» (как Stripe, Linear): нейтральные серые (zinc), белые карточки, тонкие границы, мягкая тень.
-- Смысловые цвета только для статусов: emerald — verified, red — failed, amber — pending. Бренд-акцент — почти чёрный zinc-900.
-- Системный шрифт (без загрузки из сети); моноширинный — только для хэшей и адресов.
-- Без градиентов, неоновых эффектов и декоративных иллюстраций.
-- Отступы щедрые, максимальная ширина контента — 1024 px.
+- Контраст текста ≥ 4.5:1; мелкий серый текст не светлее #5E5E57 на белом.
+- Статусы: цвет + иконка + слово (для людей с нарушением цветового зрения).
+- Все действия — `<button>` / `<a>`; фокус виден; порядок Tab логичный.
+- Анимация проверок отключается при `prefers-reduced-motion`.
+- Мобильная ширина 375 px без горизонтальной прокрутки.
 
-## 8. Проверка UX перед сдачей
+## 10. Метрики успеха UX
 
-- Первый proof с нуля за < 30 секунд, без подсказок.
-- Вердикт понятен без раскрытия деталей.
-- Весь демо-сценарий 4.3 проходит за < 60 секунд.
-- Tab проходит по всем кнопкам, фокус виден.
-- На 375 px нет горизонтальной прокрутки.
-- Каждое состояние (пусто, загрузка, ошибка, успех, pending) выглядит намеренно.
+| Метрика | Цель | Как меряем |
+|---|---|---|
+| Время до первого proof | < 30 с | юзабилити-тест, секундомер |
+| Понимание вердикта | 5 из 5 участников объясняют своими словами, что значит Failed | вопрос после задачи |
+| Прохождение guided demo без подсказок | ≥ 4 из 5 | наблюдение |
+| Понимание ценности с лендинга | ≥ 4 из 5 за 10 с отвечают «для чего это» | тест 5 секунд + вопрос |
+
+## 11. План юзабилити-теста (до кода UI)
+
+- **Участники:** 5 человек: 2 разработчика, 2 нетехнических (роль получателя), 1 человек из экосистемы Solana. NN/g: 5 участников находят большую часть проблем юзабилити ([Why You Only Need to Test with 5 Users](https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/)).
+- **Материал:** кликабельный UI-прототип (этап 3).
+- **Задачи:**
+  1. Создайте proof для документа.
+  2. Вам прислали ссылку — это настоящий результат?
+  3. Проверьте proof, не заходя на сайт издателя.
+  4. Найдите, какая запись в истории была удалена.
+- **После каждой задачи:** «Что вы ожидали увидеть?», «Что было непонятно?».
+- **Решение:** правим всё, что помешало ≥ 2 участникам.
+
+## 12. Что меняется по сравнению с первым прототипом
+
+- Hero лендинга: история спора (вариант A) вместо метафоры «Git history».
+- Два вида proof: вид издателя и публичный `/p/[id]`.
+- Новый экран `/verify` и страница сертификата.
+- Уровни подтверждения Solana (Confirmed / Finalized) в деталях proof.
+- Guided demo + Reset.
+- Пример API на карточке результата.
