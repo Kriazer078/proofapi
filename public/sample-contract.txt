@@ -1,0 +1,18 @@
+SERVICE AGREEMENT
+
+This Service Agreement is made between Northwind Analytics LLC ("Provider") and Blue Harbor Logistics Inc. ("Client").
+
+1. Services
+Provider will deliver monthly data analysis reports to Client.
+
+2. Payment
+Client shall make payment within 60 days of receiving each report. Late payment accrues interest of 2% per month.
+
+3. Termination
+Either party may end this agreement with 7 days written notice. Provider may suspend the services immediately upon termination.
+
+4. Liability
+Provider's total liability under this agreement is limited to USD 500, regardless of the damages suffered by Client.
+
+5. Governing Law
+This agreement is governed by the laws of the State of Delaware.
