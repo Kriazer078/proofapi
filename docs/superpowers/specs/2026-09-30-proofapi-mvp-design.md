@@ -1,213 +1,310 @@
-# ProofAPI MVP — Design Spec
+# ProofAPI MVP — Design Spec (v2)
 
 **Дата:** 2026-09-30
-**Статус:** утверждён
-**Цель MVP:** хакатон-демо. Приоритеты — наглядность, надёжность на показе, наличие собственного смарт-контракта на Solana.
+**Статус:** v2 — исправлены слабые места из [разбора](../../research/2026-09-30-proofapi-weaknesses.md)
+**Цель MVP:** хакатон-демо с собственным осмысленным смарт-контрактом на Solana.
 
 ## 1. Суть продукта
 
-ProofAPI — «нотариус» для действий AI. Он не хранит данные в блокчейне и не анализирует их сам — он фиксирует факт «AI получил input X, вернул output Y, в момент T, с такой-то моделью», так что последующая подмена данных обнаруживается.
+ProofAPI — «Git history для AI»: неизменяемая, проверяемая история действий AI.
 
-- Off-chain (наша БД): исходный документ, AI-ответ, metadata.
-- On-chain (Solana devnet, собственная программа): только SHA-256 хэши, proof_id, issuer, timestamp.
-- Верификация: пересчитать хэши из off-chain данных и сравнить с on-chain записью.
+- Off-chain: исходный документ, AI-ответ, metadata, соль.
+- On-chain (Solana devnet, собственная Anchor-программа): солёные SHA-256 хэши, связанные в **цепочку истории издателя** со сквозной нумерацией.
+- Проверить может кто угодно, в том числе независимым верификатором, который не обращается к нашему серверу.
 
-## 2. Scope
+**Что изменилось с v1:**
+- Контракт не просто хранит хэши, а обеспечивает целостность всей истории: реестр издателей, нумерация, хэш-цепочка, ротация и отзыв ключей.
+- Солёные хэши.
+- Evidence Pack и независимый верификатор.
+- Аудит истории находит удалённые записи.
+- Режим «только хэши».
+- Честные формулировки гарантий.
 
-**В MVP:**
-- Загрузка документа (PDF или TXT), извлечение текста.
-- AI-анализ через интерфейс `AIProvider`; в MVP — детерминированный mock.
-- Создание proof: 3 хэша → запись в собственную Anchor-программу на devnet → сохранение в БД.
-- Страница верификации `/proof/[id]` с разбивкой по полям и ссылкой на Solana Explorer.
-- Tampering demo: подмена AI-ответа в БД → VERIFICATION FAILED → восстановление.
-- Список proof-ов.
-- Agent-поля в модели данных и API (без отдельного UI).
+## 2. Гарантии — что доказываем и что нет
 
-**Вне MVP:** реальный AI-провайдер (подключается позже через `AIProvider`), авторизация и API-ключи, мульти-тенантность, UI для agent-цепочек, mainnet, подключение Phantom в приложении.
+Эти формулировки используются в UI, документации и питче без преувеличений.
 
-## 3. Стек
+**Доказываем:**
+- Данные (input, output, metadata) **не менялись после записи**.
+- Запись существовала **не позже** времени блокчейна (`Clock`); задним числом её не создать.
+- Запись сделана **ключом зарегистрированного издателя**, активного на момент записи.
+- В истории издателя **нет вставок, удалений и перестановок** задним числом: нумерация и хэш-цепочка проверяются контрактом.
 
-| Слой | Технология |
+**Не доказываем (и говорим об этом прямо):**
+- Что издатель записал правду в момент записи. Решение в дорожной карте — zkTLS-подтверждение от провайдера AI (§14).
+- Какая модель реально использовалась: поле `model` — **заявление издателя** (`model_attestation: "declared"`).
+- Что издатель записал **все** действия: незаписанное действие не обнаруживается. Удаление уже записанного — обнаруживается.
+- Юридическую силу в суде. Формулировка — «технически проверяемое доказательство целостности».
+
+## 3. Позиционирование против альтернатив
+
+| Альтернатива | Чего не даёт по сравнению с ProofAPI |
 |---|---|
-| Web + API | Next.js 15 (App Router), TypeScript |
-| UI | Tailwind CSS |
-| БД | SQLite через Prisma |
-| Смарт-контракт | Rust + Anchor, сборка и деплой через Solana Playground (beta.solpg.io) |
-| Solana-клиент | `@solana/web3.js`; инструкции и аккаунты кодируются вручную по формату Anchor (discriminator = первые 8 байт `sha256("global:create_proof")` / `sha256("account:ProofRecord")`), без `@coral-xyz/anchor` и IDL — чтобы не зависеть от версии Anchor в Playground |
-| PDF | `pdf-parse` |
-| Тесты | Vitest |
+| Серверные логи, hash-chain библиотеки | Оператор может пересчитать всю цепочку; нет внешнего времени |
+| WORM (S3 Object Lock) | Хранилище и ключи у самой компании; проверить без доверия нельзя |
+| OpenTimestamps | Нет издателей, ключей, отзыва, истории и аудита пропусков |
+| Квалифицированные метки eIDAS | Юридическая презумпция в ЕС, но только для отдельного документа; нет целостности всей истории; можно добавить поверх (§14) |
+| Solana Attestation Service | Аттестации отдельных утверждений; нет нумерации, хэш-цепочки и аудита истории |
+| Cinchor | Собственный L1, все валидаторы у основателя; у нас публичная Solana |
 
-Причина Playground: на машине нет Rust, Solana CLI, Anchor и WSL; локальная установка на Windows рискованна для хакатона. Исходник программы хранится в репозитории.
-
-Язык UI — английский.
+**Почему Solana:** правила истории (нумерация, цепочка, права издателя) исполняет контракт, а не мы; время из `Clock`; запись дешёвая и быстрая; проверка — чтение публичных аккаунтов любым RPC.
 
 ## 4. Смарт-контракт `proof_registry`
 
-### Аккаунт `ProofRecord` (PDA)
+### Аккаунт `Issuer` (PDA)
 
-Seeds: `["proof", issuer_pubkey, proof_id]`.
+Seeds: `["issuer", authority]`.
 
 | Поле | Тип | Описание |
 |---|---|---|
-| `proof_id` | `[u8; 16]` | UUID v4 в байтах |
-| `input_hash` | `[u8; 32]` | SHA-256 input |
-| `output_hash` | `[u8; 32]` | SHA-256 output |
-| `metadata_hash` | `[u8; 32]` | SHA-256 канонического JSON metadata |
-| `previous_proof_hash` | `[u8; 32]` | хэш предыдущего proof в agent-цепочке; все нули, если нет |
-| `issuer` | `Pubkey` | подписант транзакции |
-| `timestamp` | `i64` | `Clock::get()?.unix_timestamp` — время блокчейна |
+| `authority` | `Pubkey` | владелец издателя, управляет ключами (холодный ключ) |
+| `writer` | `Pubkey` | ключ, которым подписываются proof-ы (горячий ключ сервера или агента) |
+| `name` | `[u8; 32]` | имя издателя, UTF-8, дополненное нулями |
+| `active` | `bool` | деактивированный издатель не может писать |
+| `proof_count` | `u64` | число записей; номер следующей записи |
+| `last_record_hash` | `[u8; 32]` | `record_hash` последней записи; нули, если записей нет |
+| `created_at` | `i64` | время регистрации (`Clock`) |
 | `bump` | `u8` | PDA bump |
 
-Размер: 8 (discriminator) + 16 + 32×4 + 32 + 8 + 1 = 193 байта. Аренда ≈ 0.0022 SOL.
+Размер: 8 + 32 + 32 + 32 + 1 + 8 + 32 + 8 + 1 = 154 байта.
 
-### Инструкция `create_proof(proof_id, input_hash, output_hash, metadata_hash, previous_proof_hash)`
+### Аккаунт `ProofRecord` (PDA)
 
-- `issuer` — `Signer`, платит за аккаунт.
-- Аккаунт создаётся через `init` → повторный вызов с тем же `proof_id` падает.
-- `timestamp` записывается из `Clock`, клиент его не передаёт.
-- Эмитит событие `ProofCreated { proof_id, issuer, timestamp }`.
+Seeds: `["proof", issuer, sequence.to_le_bytes()]`. Адрес вычисляется по номеру, поэтому историю можно обойти по порядку.
 
-Инструкций update/delete нет. Неизменяемость обеспечена кодом программы.
+| Поле | Тип | Описание |
+|---|---|---|
+| `issuer` | `Pubkey` | адрес PDA издателя |
+| `sequence` | `u64` | номер записи у издателя, с 0 |
+| `proof_id` | `[u8; 16]` | UUID v4 |
+| `input_hash` | `[u8; 32]` | `SHA256(salt ‖ input_bytes)` |
+| `output_hash` | `[u8; 32]` | `SHA256(salt ‖ output_json)` |
+| `metadata_hash` | `[u8; 32]` | `SHA256(salt ‖ metadata_json)` |
+| `prev_record_hash` | `[u8; 32]` | `last_record_hash` издателя на момент записи |
+| `record_hash` | `[u8; 32]` | хэш самой записи (формула ниже), вычисляется **в контракте** |
+| `timestamp` | `i64` | `Clock::get()?.unix_timestamp` |
+| `bump` | `u8` | PDA bump |
 
-### Деплой
+Размер: 8 + 32 + 8 + 16 + 32×5 + 8 + 1 = 233 байта. Аренда: (233 + 128) × 6,960 = 2,512,560 лампортов ≈ 0.00251 SOL; 5 SOL ≈ 1,988 записей.
 
-1. Кошелёк Playground пополняется через faucet.solana.com (GitHub-логин, 5 SOL).
-2. Build + Deploy в Playground на devnet.
-3. Program ID переносится в `.env` (`PROGRAM_ID`). IDL не нужен: клиент кодирует данные вручную.
+**Формула `record_hash`** (sha256 от конкатенации через `solana_program::hash::hashv`):
 
-## 5. Off-chain модули
-
-Каждый модуль — отдельный файл в `lib/` с одной ответственностью.
-
-### `lib/hashing.ts`
-- `sha256Hex(data: string | Buffer): string`
-- `canonicalJson(obj): string` — JSON с рекурсивно отсортированными ключами, без пробелов.
-- `hashMetadata(meta): string` = `sha256Hex(canonicalJson(meta))`.
-- Input хэшируется по **сырым байтам загруженного файла**. Output хэшируется как `canonicalJson(aiResult)`.
-- В БД `outputJson` и `metadataJson` хранятся уже в каноническом виде; verifier хэширует хранимую строку как есть (без повторного парсинга), поэтому любое изменение строки ловится.
-
-### `lib/ai-provider.ts`
-```ts
-interface AIProvider {
-  name: string;   // "mock"
-  model: string;  // "proofapi-mock-v1"
-  analyze(text: string): Promise<AnalysisResult>;
-}
-interface AnalysisResult {
-  riskScore: number;        // 0..100
-  issues: string[];
-  summary: string;
-}
 ```
-Mock: ищет ключевые слова (termination, liability, penalty, payment, indemnif…) и детерминированно считает riskScore из найденных совпадений и длины текста. Один и тот же текст → один и тот же результат.
+record_hash = SHA256( "proofapi-v1" ‖ issuer(32) ‖ sequence(u64 LE) ‖ proof_id(16)
+                    ‖ input_hash ‖ output_hash ‖ metadata_hash
+                    ‖ prev_record_hash ‖ timestamp(i64 LE) )
+```
 
-### `lib/solana/`
+### Инструкции
+
+| Инструкция | Подписант | Что делает |
+|---|---|---|
+| `register_issuer(name, writer)` | `authority` | создаёт `Issuer`, `active = true`, `proof_count = 0` |
+| `set_writer(new_writer)` | `authority` | ротация горячего ключа (после утечки или по расписанию) |
+| `set_active(active)` | `authority` | деактивация или повторная активация издателя |
+| `create_proof(proof_id, input_hash, output_hash, metadata_hash)` | `writer` | проверяет `issuer.active` и подпись `writer`; создаёт `ProofRecord` с `sequence = proof_count`, `prev_record_hash = last_record_hash`, считает `record_hash`; обновляет издателя: `proof_count += 1`, `last_record_hash = record_hash`; эмитит `ProofCreated` |
+
+Инструкций изменения и удаления записей нет. Повторная запись с тем же номером невозможна: PDA уже существует.
+
+**Ошибки программы:** `IssuerInactive`, `UnauthorizedWriter`, `NameTooLong` (проверка в клиенте), стандартные ошибки Anchor для подписей и `init`.
+
+### Сборка и деплой
+
+Через Solana Playground (beta.solpg.io): на машине нет Rust, Anchor и WSL. Исходник хранится в `programs/proof_registry/src/lib.rs`. Program ID переносится в `.env`. Клиент кодирует инструкции и аккаунты вручную по формату Anchor (discriminator = первые 8 байт `sha256("global:<instruction>")` / `sha256("account:<Account>")`), без `@coral-xyz/anchor` и IDL.
+
+## 5. Хэширование и соль
+
+- Для каждого proof генерируется `salt` — 32 случайных байта.
+- `input_hash = SHA256(salt ‖ сырые байты файла)`.
+- `output_hash = SHA256(salt ‖ canonical_json(ai_result))`.
+- `metadata_hash = SHA256(salt ‖ canonical_json(metadata))`.
+- `canonical_json` — JSON с рекурсивно отсортированными ключами, без пробелов, без `undefined`.
+- В БД `output_json` и `metadata_json` хранятся уже канонически. Verifier хэширует хранимую строку как есть.
+- Соль хранится off-chain (БД, Evidence Pack) и в блокчейн не попадает. Это закрывает перебор коротких ответов и снижает риски GDPR.
+
+## 6. Off-chain модули (`lib/`)
+
+| Модуль | Ответственность |
+|---|---|
+| `hashing.ts` | `sha256Hex`, `canonicalJson`, `saltedHash(salt, data)`, `newSalt()` |
+| `ai-provider.ts` | интерфейс `AIProvider`; `MockAIProvider` (детерминированный, `name: "mock"`, `model: "proofapi-mock-v1"`) |
+| `extract-text.ts` | текст из PDF и TXT, лимит 5 МБ, ошибки валидации |
+| `solana/encoding.ts` | discriminators, кодирование инструкций, декодирование `Issuer` и `ProofRecord`, PDA, `computeRecordHash` (зеркало формулы из контракта) |
+| `solana/memory-client.ts` | `InMemoryChainClient` — та же логика, что у контракта (нумерация, цепочка, активность, writer), для тестов и разработки |
+| `solana/anchor-client.ts` | `AnchorChainClient` — реальная программа на devnet |
+| `solana/index.ts` | выбор клиента по `CHAIN_MODE=memory\|anchor` |
+| `proof-repo.ts` | интерфейс хранилища + реализация на Prisma; `proof-repo-memory.ts` для тестов |
+| `proof-service.ts` | создание proof, режим «только хэши», повтор записи в цепь, demo-подмена, восстановление и удаление |
+| `verifier.ts` | проверка одного proof: хэши, `record_hash`, связь с предыдущей записью, издатель |
+| `history-audit.ts` | аудит истории издателя: обход цепочки в Solana и сравнение с БД |
+| `evidence-pack.ts` | сборка Evidence Pack |
+
+### Интерфейс `ChainClient`
+
 ```ts
 interface ChainClient {
-  anchorProof(p: ChainProofInput): Promise<{ signature: string; pda: string }>;
-  readProof(proofId: string, issuer: string): Promise<ChainProofRecord | null>;
-  issuerPubkey(): string;
+  issuerAddress(): string;                        // PDA издателя
+  ensureIssuer(name: string): Promise<IssuerState>; // memory: регистрирует сам; anchor: читает, ошибка если издатель не зарегистрирован
+  anchorProof(p: { proofId; inputHash; outputHash; metadataHash }):
+    Promise<{ signature: string; account: string; sequence: number;
+              recordHash: string; prevRecordHash: string; timestamp: number }>;
+  readIssuer(issuer: string): Promise<IssuerState | null>;
+  readProofBySequence(issuer: string, sequence: number): Promise<ChainProofRecord | null>;
+  readProofAccount(account: string): Promise<ChainProofRecord | null>;
+  explorerUrl(signature: string): string | null;
 }
 ```
-- `AnchorChainClient` — реальная программа на devnet.
-- `InMemoryChainClient` — для тестов и локальной разработки до деплоя контракта.
-- Выбор по env: `CHAIN_MODE=anchor|memory`.
 
-### `lib/proof-service.ts`
-`createProof(file, agentFields?)`:
-1. Извлечь текст → `AIProvider.analyze`.
-2. Собрать metadata: `{ provider, model, created_at, file_name, agent_id?, tool_name?, action_type?, external_api? }`.
-3. Посчитать 3 хэша, сгенерировать `proof_id` (UUID v4).
-4. Сохранить в БД со статусом `PENDING_CHAIN`.
-5. `ChainClient.anchorProof` → статус `ANCHORED`, сохранить `solana_transaction`, `pda`, on-chain `timestamp`.
-6. При ошибке сети — статус остаётся `PENDING_CHAIN`, ошибка возвращается в UI; `retryAnchoring(proofId)` повторяет шаг 5.
+## 7. Проверки
 
-### `lib/verifier.ts`
-`verifyProof(proofId): VerificationResult`
-1. Загрузить off-chain данные из БД.
-2. Пересчитать хэши из хранимых input/output/metadata.
-3. Вычислить PDA из `proof_id` и ожидаемого issuer (из env, не из БД) и прочитать аккаунт из Solana.
-4. Сравнить каждое поле.
+### `verifyProof(proofId)` → `VerificationResult`
+
+1. Загрузить из БД данные, соль, адрес аккаунта и номер.
+2. Пересчитать три солёных хэша.
+3. Прочитать `ProofRecord` из Solana. Для реального клиента проверить, что владелец аккаунта — наша программа и discriminator совпадает.
+4. Проверки:
+   - `input`, `output`, `metadata`: пересчитанный хэш равен on-chain;
+   - `record`: `computeRecordHash(on-chain поля)` равен on-chain `record_hash`;
+   - `chain`: для `sequence > 0` `prev_record_hash` равен `record_hash` записи `sequence − 1`; для `sequence = 0` — нули;
+   - `issuer`: on-chain `issuer` равен ожидаемому издателю (из env, не из БД).
+5. `VERIFIED`, только если все проверки прошли; `NOT_ON_CHAIN`, если записи нет.
 
 ```ts
 interface VerificationResult {
   status: "VERIFIED" | "FAILED" | "NOT_ON_CHAIN";
   checks: {
-    input:    { ok: boolean; stored: string; current: string };
-    output:   { ok: boolean; stored: string; current: string };
-    metadata: { ok: boolean; stored: string; current: string };
-    issuer:   { ok: boolean; expected: string; onChain: string };
+    input: HashCheck; output: HashCheck; metadata: HashCheck;
+    record: { ok: boolean };
+    chain: { ok: boolean; sequence: number };
+    issuer: { ok: boolean; expected: string; onChain: string };
   };
   onChainTimestamp: number | null;
   explorerUrl: string | null;
 }
+interface HashCheck { ok: boolean; stored: string; current: string } // stored = on-chain
 ```
-`stored` — значение из блокчейна, `current` — пересчитанное. `VERIFIED` только если все четыре проверки `ok`.
 
-## 6. Модель данных (Prisma, SQLite)
+### `auditHistory()` → `HistoryAudit`
 
-`Proof`:
-`id` (UUID, = proof_id), `inputBlob` (Bytes), `inputFileName`, `inputText`, `outputJson` (String), `metadataJson` (String), `inputHash`, `outputHash`, `metadataHash`, `provider`, `model`, `creatorWallet` (issuer pubkey), `status` (`PENDING_CHAIN` | `ANCHORED`), `solanaTransaction?`, `pda?`, `chainTimestamp?`, `agentId?`, `toolName?`, `actionType?`, `externalApi?`, `previousProofHash?`, `tamperedBackupJson?`, `createdAt`.
+Обходит записи издателя `0 … proof_count − 1` в Solana и для каждой проверяет:
+- запись есть в БД (иначе `MISSING_IN_DATABASE` — запись удалили у себя);
+- данные в БД дают те же хэши (иначе `DATA_MODIFIED`);
+- цепочка не разорвана (иначе `CHAIN_BROKEN`).
 
-## 7. API
+Записи, созданные в режиме «только хэши», получают статус `HASH_ONLY`: содержимого у нас нет, проверяется только наличие и цепочка.
+
+Возвращает список записей со статусами и сводку: сколько всего, сколько в порядке, какие номера проблемные.
+
+## 8. API
 
 | Метод | Путь | Описание |
 |---|---|---|
-| POST | `/api/proofs` | multipart: `file` + опциональные agent-поля → создаёт proof |
+| POST | `/api/proofs` | multipart: `file` + опционально `agent_id`, `tool_name`, `action_type`, `external_api`, `parent_proof_id` → анализ, proof, запись в цепь |
+| POST | `/api/proofs/hashes` | JSON `{ input_hash, output_hash, metadata_hash }` — режим «только хэши»: данные остаются у клиента, мы только записываем в цепь |
 | GET | `/api/proofs` | список |
 | GET | `/api/proofs/[id]` | данные proof |
 | GET | `/api/proofs/[id]/verify` | `VerificationResult` |
-| POST | `/api/proofs/[id]/retry` | повтор записи в Solana |
+| GET | `/api/proofs/[id]/evidence` | скачать Evidence Pack (JSON) |
+| POST | `/api/proofs/[id]/retry` | повтор записи в цепь |
 | POST | `/api/proofs/[id]/tamper` | demo: подменить output |
 | POST | `/api/proofs/[id]/restore` | demo: вернуть оригинал |
+| POST | `/api/proofs/[id]/delete` | demo: удалить запись из БД (имитация «спрятать неудобное») |
+| GET | `/api/history/audit` | `HistoryAudit` |
 
-## 8. UI
+Metadata proof-а: `{ provider, model, model_attestation: "declared", created_at, file_name, agent_id?, tool_name?, action_type?, external_api?, parent_proof_id? }`.
 
-- `/` — лендинг: «Immutable audit trail for AI», схема пайплайна, кнопка «Try the demo».
-- `/new` — загрузка файла (есть кнопка «Use sample contract»), анимированные шаги: Analyzing → Hashing → Anchoring on Solana → Done. Показ AI-результата и хэшей, переход на proof.
-- `/proof/[id]` — большой статус-баннер (зелёный VERIFIED / красный VERIFICATION FAILED с указанием поля, например «OUTPUT HAS BEEN MODIFIED»), таблица проверок со stored vs current хэшами (различие подсвечено), AI-результат, metadata, ссылка на Explorer, кнопки «Re-verify», «Simulate tampering», «Restore original».
-- `/proofs` — таблица proof-ов со статусами.
+## 9. Evidence Pack и независимый верификатор
 
-## 9. Tampering demo
+### Evidence Pack (`proofapi-evidence-v1`)
 
-- `tamper`: сохраняет оригинальный `outputJson` в `tamperedBackupJson`, записывает изменённый результат (`riskScore` → 5, issues очищены). Хэши в БД и блокчейне не трогаются.
-- Повторная верификация: `output.current ≠ output.stored` → `FAILED`, баннер «OUTPUT HAS BEEN MODIFIED», показаны оба хэша.
-- `restore`: возвращает оригинал из бэкапа → снова `VERIFIED`.
-- Страница явно помечает, что это симуляция атаки на off-chain хранилище.
+```json
+{
+  "version": "proofapi-evidence-v1",
+  "cluster": "devnet",
+  "rpc_url": "https://api.devnet.solana.com",
+  "program_id": "<program id>",
+  "issuer": "<issuer PDA>",
+  "proof_account": "<ProofRecord address>",
+  "sequence": 5,
+  "proof_id": "<uuid>",
+  "salt": "<hex>",
+  "input": { "file_name": "contract.pdf", "content_base64": "..." },
+  "output_json": "<canonical json string>",
+  "metadata_json": "<canonical json string>"
+}
+```
 
-## 10. Ошибки
+### Независимый верификатор
 
-- Solana недоступна / нет SOL → proof в `PENDING_CHAIN`, понятное сообщение, кнопка «Retry anchoring».
-- Аккаунт в блокчейне не найден → `NOT_ON_CHAIN`.
-- Неподдерживаемый файл или >5 МБ → 400 с сообщением.
-- PDF без извлекаемого текста → 400 «No text found in document».
+Один файл `public/verifier.html` без зависимостей и без обращений к нашему API. Его можно скачать и открыть откуда угодно.
 
-## 11. Настройка окружения
+1. Пользователь загружает Evidence Pack.
+2. Страница считает солёные хэши через WebCrypto.
+3. Запрашивает `getAccountInfo(proof_account)` напрямую у публичного RPC Solana.
+4. Проверяет, что владелец аккаунта — `program_id`, discriminator равен `sha256("account:ProofRecord")[0..8]`, поля `issuer` и `sequence` совпадают с пакетом.
+5. Сравнивает хэши, пересчитывает `record_hash` и показывает VERIFIED или FAILED по каждому полю.
 
-- `npm run setup`: генерирует серверный issuer-кошелёк в `.keys/issuer.json` (в `.gitignore`), печатает pubkey и инструкцию пополнить его через faucet.solana.com.
-- `.env`: `CHAIN_MODE`, `SOLANA_RPC_URL` (devnet), `PROGRAM_ID`, `ISSUER_KEYPAIR_PATH`, `DATABASE_URL`.
+PDA в браузере не вычисляется: аккаунт, принадлежащий программе, с верным discriminator и полями может создать только наша программа.
 
-## 12. Тесты
+Верификатор работает только с записями в реальной сети (`CHAIN_MODE=anchor`). В memory-режиме кнопка его открытия скрыта.
 
-- `hashing`: детерминизм, изменение одного байта меняет хэш, canonicalJson не зависит от порядка ключей.
-- `ai-provider` (mock): детерминизм, диапазон 0..100.
-- `verifier` с `InMemoryChainClient`: VERIFIED для чистого proof; FAILED с правильным полем при подмене input, output, metadata; FAILED по issuer при чужом подписанте; NOT_ON_CHAIN.
-- `proof-service`: успешный путь, `PENDING_CHAIN` при ошибке chain-клиента, retry.
-- Контракт: тест в Playground — create_proof успешен, повторный create_proof с тем же id падает.
-- Ручной end-to-end на devnet.
+## 10. UI
 
-## 13. Порядок работ
+- `/` — лендинг: «Git history для AI», три гарантии, честный блок «что мы не доказываем», кнопка «Try the demo».
+- `/new` — загрузка файла или «Use sample contract»; шаги Analyzing → Hashing → Anchoring → Done; метка **«Demo AI (mock)»**.
+- `/proof/[id]` — баннер VERIFIED / FAILED с указанием поля; таблица проверок (input, output, metadata, record, chain, issuer); номер в истории и ссылка на предыдущую запись; модель с пометкой «заявлена издателем»; кнопки Re-verify, Simulate tampering, Restore, Download Evidence Pack, Open independent verifier.
+- `/history` — вся история издателя по номерам со статусами аудита; кнопка demo «Delete record from database»; удалённая запись подсвечивается: «Запись №5 есть в Solana, но удалена из базы».
+- `/verifier.html` — независимый верификатор.
 
-1. Next.js-каркас, hashing, mock-AI, БД, proof-service, verifier на `InMemoryChainClient`.
-2. UI: `/new`, `/proof/[id]`, tampering demo, `/proofs`, лендинг.
-3. Контракт в Playground: написать, протестировать, задеплоить; перенести Program ID и IDL.
-4. `AnchorChainClient`, переключение на `CHAIN_MODE=anchor`, end-to-end на devnet.
+## 11. Сценарий демо
 
-Демо работает после шага 2 (в memory-режиме), так что задержка с контрактом не блокирует показ.
+1. Загрузить документ → AI отвечает → proof №N в Solana, ссылка в Explorer.
+2. Simulate tampering → **VERIFICATION FAILED — OUTPUT HAS BEEN MODIFIED**.
+3. Delete record → на `/history`: **«Запись №N удалена из базы — в Solana она есть»**.
+4. Download Evidence Pack → открыть `verifier.html` → проверка напрямую через Solana, без нашего сервера.
+
+## 12. Ошибки
+
+- Solana недоступна или нет SOL → proof в `PENDING_CHAIN`, кнопка «Retry anchoring».
+- Издатель деактивирован → запись отклоняется с понятным сообщением.
+- Файл не того типа или больше 5 МБ → 400. PDF без текста → 400 «No text found in document».
+- Невалидные хэши в режиме «только хэши» → 400.
+
+## 12a. Настройка окружения и ключи
+
+- `npm run setup` создаёт две пары ключей в `.keys/` (папка в `.gitignore`): `authority.json` — управление издателем, и `writer.json` — подпись proof-ов. Печатает адреса и инструкцию пополнить их через faucet.solana.com.
+- `npm run register-issuer` (подпись `authority`) регистрирует издателя с `writer`. Сервер при работе использует только `writer`.
+- `.env`: `CHAIN_MODE`, `SOLANA_RPC_URL`, `PROGRAM_ID`, `AUTHORITY_PUBKEY`, `WRITER_KEYPAIR_PATH`, `ISSUER_NAME`, `DATABASE_URL`.
+
+## 13. Тесты
+
+- `hashing`: известный вектор SHA-256, детерминизм `canonicalJson`, солёный хэш меняется при другой соли.
+- `ai-provider` (mock): детерминизм, образец договора даёт 31.
+- `solana/encoding`: discriminators, кодирование инструкций, декодирование обоих аккаунтов, `computeRecordHash` на фиксированном векторе.
+- `memory-client`: нумерация, цепочка, отказ неактивному издателю и чужому writer.
+- `proof-service`: успешный путь, `PENDING_CHAIN` и retry, режим «только хэши», подмена, восстановление, удаление.
+- `verifier`: VERIFIED; FAILED по input, output, metadata; FAILED по chain при подмене `prev`; NOT_ON_CHAIN.
+- `history-audit`: удалённая из БД запись → `MISSING_IN_DATABASE`; изменённая → `DATA_MODIFIED`.
+- Контракт: тесты в Playground — регистрация, запись с верной нумерацией и цепочкой, отказ чужому writer, отказ после деактивации.
+- Ручной end-to-end на devnet, включая `verifier.html`.
 
 ## 14. После MVP (backlog)
 
-- **Client-side hashing в SDK.** SDK считает `input_hash`, `output_hash`, `metadata_hash` на стороне клиента и отправляет в API только хэши. Документы не покидают инфраструктуру клиента: меньше трафика и хранения у нас, сильный аргумент приватности. API получает режим `POST /api/proofs/hashes` (только хэши + metadata без содержимого); верификация в этом режиме выполняется клиентом или по предъявленным данным.
-- **Солёные хэши.** Короткие предсказуемые output (например, `Risk Score: 31`) можно подобрать перебором по хэшу. Хэшировать `salt || data`, соль хранится off-chain вместе с данными.
-- **Merkle-батчинг.** Запись одного Merkle-корня на пачку proof-ов вместо аккаунта на каждый proof (≈1000× дешевле); проверка через Merkle-путь.
-- **Оптимизация AI-токенов** при подключении реального провайдера: кэш результата по `input_hash`, дешёвая модель, лимит `max_tokens`, prompt caching, обрезка длинных документов.
+- **zkTLS-подтверждение ответа провайдера AI** (TLSNotary, Reclaim, Opacity): доказать, что output пришёл с `api.openai.com` / `api.anthropic.com`. Закрывает слабости «целостность ≠ правдивость» и «модель — заявление».
+- **Квалифицированная метка eIDAS** поверх `record_hash` для юридической силы в ЕС.
+- **Батчинг:** один on-chain аккаунт на пачку proof-ов (Merkle-корень) с той же нумерацией и цепочкой батчей.
+- **SDK** (TypeScript, Python) с хэшированием на стороне клиента.
+- **Реальный AI-провайдер** с оптимизацией токенов: кэш по `input_hash`, дешёвая модель, лимит `max_tokens`, prompt caching.
+
+## 15. Стек
+
+Next.js 15 (App Router, TypeScript), Tailwind, SQLite через Prisma 6, `@solana/web3.js` v1, `pdf-parse`, Vitest; контракт — Rust и Anchor через Solana Playground. Язык UI — английский.
+
+## 16. Порядок работ
+
+1. Каркас Next.js; hashing, mock-AI, извлечение текста; encoding и `InMemoryChainClient` с полной логикой цепочки; repo, proof-service, verifier, history-audit, evidence-pack.
+2. API и UI: `/new`, `/proof/[id]`, `/history`, лендинг, `verifier.html`.
+3. Контракт в Playground: написать, протестировать, задеплоить.
+4. `AnchorChainClient`, переключение на `CHAIN_MODE=anchor`, end-to-end на devnet.
+
+Демо работает в memory-режиме уже после шага 2.
