@@ -33,7 +33,7 @@ ProofAPI — «нотариус» для действий AI. Он не хран
 | UI | Tailwind CSS |
 | БД | SQLite через Prisma |
 | Смарт-контракт | Rust + Anchor, сборка и деплой через Solana Playground (beta.solpg.io) |
-| Solana-клиент | `@solana/web3.js`, `@coral-xyz/anchor` |
+| Solana-клиент | `@solana/web3.js`; инструкции и аккаунты кодируются вручную по формату Anchor (discriminator = первые 8 байт `sha256("global:create_proof")` / `sha256("account:ProofRecord")`), без `@coral-xyz/anchor` и IDL — чтобы не зависеть от версии Anchor в Playground |
 | PDF | `pdf-parse` |
 | Тесты | Vitest |
 
@@ -73,7 +73,7 @@ Seeds: `["proof", issuer_pubkey, proof_id]`.
 
 1. Кошелёк Playground пополняется через faucet.solana.com (GitHub-логин, 5 SOL).
 2. Build + Deploy в Playground на devnet.
-3. Program ID и IDL (`idl.json`) переносятся в репозиторий.
+3. Program ID переносится в `.env` (`PROGRAM_ID`). IDL не нужен: клиент кодирует данные вручную.
 
 ## 5. Off-chain модули
 
@@ -204,3 +204,10 @@ interface VerificationResult {
 4. `AnchorChainClient`, переключение на `CHAIN_MODE=anchor`, end-to-end на devnet.
 
 Демо работает после шага 2 (в memory-режиме), так что задержка с контрактом не блокирует показ.
+
+## 14. После MVP (backlog)
+
+- **Client-side hashing в SDK.** SDK считает `input_hash`, `output_hash`, `metadata_hash` на стороне клиента и отправляет в API только хэши. Документы не покидают инфраструктуру клиента: меньше трафика и хранения у нас, сильный аргумент приватности. API получает режим `POST /api/proofs/hashes` (только хэши + metadata без содержимого); верификация в этом режиме выполняется клиентом или по предъявленным данным.
+- **Солёные хэши.** Короткие предсказуемые output (например, `Risk Score: 31`) можно подобрать перебором по хэшу. Хэшировать `salt || data`, соль хранится off-chain вместе с данными.
+- **Merkle-батчинг.** Запись одного Merkle-корня на пачку proof-ов вместо аккаунта на каждый proof (≈1000× дешевле); проверка через Merkle-путь.
+- **Оптимизация AI-токенов** при подключении реального провайдера: кэш результата по `input_hash`, дешёвая модель, лимит `max_tokens`, prompt caching, обрезка длинных документов.
