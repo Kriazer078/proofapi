@@ -46,7 +46,7 @@ export default async function JournalPage() {
           {entries.map((e) => {
             const tone = TONE[e.status];
             const s = t.journal.status[e.status];
-            const title = e.fileName ?? (e.status === "HASH_ONLY" ? s.label : t.journal.unknown);
+            const title = e.fileName ?? (e.status === "HASH_ONLY" ? t.cert.hashOnly : t.journal.unknown);
             const body = (
               <>
                 <div className="min-w-0 flex-1">

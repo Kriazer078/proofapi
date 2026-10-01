@@ -10,14 +10,15 @@ export interface AIProvider {
   analyze(text: string): Promise<AnalysisResult>;
 }
 
+/** English, Russian and Kazakh stems, matching the languages of the interface. */
 const RULES: { pattern: RegExp; issue: string; weight: number }[] = [
-  { pattern: /terminat/i, issue: "Termination clause", weight: 8 },
-  { pattern: /liabilit/i, issue: "Liability risk", weight: 13 },
-  { pattern: /payment|invoice/i, issue: "Payment condition", weight: 10 },
-  { pattern: /penalt/i, issue: "Penalty clause", weight: 12 },
-  { pattern: /indemnif/i, issue: "Indemnification obligation", weight: 15 },
-  { pattern: /confidential/i, issue: "Confidentiality obligation", weight: 4 },
-  { pattern: /auto(matic)?(ally)?[- ]?renew/i, issue: "Automatic renewal", weight: 9 },
+  { pattern: /terminat|расторж|бұзу/i, issue: "Termination clause", weight: 8 },
+  { pattern: /liabilit|ответственн|жауапкершілі/i, issue: "Liability risk", weight: 13 },
+  { pattern: /payment|invoice|оплат|платеж|платёж|төлем/i, issue: "Payment condition", weight: 10 },
+  { pattern: /penalt|штраф|неустойк|айыппұл/i, issue: "Penalty clause", weight: 12 },
+  { pattern: /indemnif|возмещени|өтеу/i, issue: "Indemnification obligation", weight: 15 },
+  { pattern: /confidential|конфиденциальн|құпия/i, issue: "Confidentiality obligation", weight: 4 },
+  { pattern: /auto(matic)?(ally)?[- ]?renew|автопролонг|автоматическ[а-я]* продлен|автоматты ұзарт/i, issue: "Automatic renewal", weight: 9 },
 ];
 
 /** Deterministic keyword-based stand-in for a real model. Real providers plug in behind AIProvider later. */

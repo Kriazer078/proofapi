@@ -57,12 +57,12 @@ const en = {
     lead: "Upload a contract. The AI checks it for risks, and you get a sealed certificate you can share.",
     drop: "Drag a PDF or TXT file here",
     choose: "Choose a file",
-    limit: "Up to 5 MB",
+    limit: "Up to 4 MB",
     sampleQ: "No document at hand?",
     sample: "Try our sample contract",
     steps: ["Reading the document", "The AI is checking", "Putting the seal", "Saving it for good"],
     wait: "a few seconds…",
-    tooBig: (name: string, size: string) => `${name} is ${size}. The limit is 5 MB.`,
+    tooBig: (name: string, size: string) => `${name} is ${size}. The limit is 4 MB.`,
     note: "The AI in this demo is simulated. The seal is real.",
   },
   cert: {
@@ -125,7 +125,7 @@ const en = {
     problems: "Problems",
     status: {
       OK: { label: "Genuine", note: "" },
-      HASH_ONLY: { label: "Seal only", note: "The content is kept by its owner." },
+      HASH_ONLY: { label: "Seal only", note: "" },
       MISSING_IN_DATABASE: { label: "Deleted", note: "Deleted from the database, but the seal remains." },
       DATA_MODIFIED: { label: "Changed", note: "Edited after sealing." },
       CHAIN_BROKEN: { label: "Broken", note: "The journal order is broken." },
@@ -147,7 +147,17 @@ const en = {
     expertButton: "Open the independent checker",
   },
   footer: { chain: "Seals are stored in the Solana blockchain.", demo: "The AI in this demo is simulated." },
-  errors: { generic: "Something went wrong. Please try again." },
+  errors: {
+    generic: "Something went wrong. Please try again.",
+    codes: {
+      too_large: "The file is larger than 4 MB.",
+      unreadable_pdf: "We couldn't read this PDF. It may be damaged or password-protected.",
+      unsupported_type: "Upload a PDF or TXT file.",
+      no_text: "There is no text in this document. Scanned PDFs aren't supported yet.",
+      no_file: "Choose a file to upload.",
+      bad_request: "Something went wrong with the upload. Please try again.",
+    } as Record<string, string>,
+  },
 };
 
 export type Messages = typeof en;
@@ -204,12 +214,12 @@ const ru: Messages = {
     lead: "Загрузите договор. ИИ проверит его на риски, а вы получите запечатанный сертификат, который можно отправить.",
     drop: "Перетащите сюда файл PDF или TXT",
     choose: "Выбрать файл",
-    limit: "До 5 МБ",
+    limit: "До 4 МБ",
     sampleQ: "Нет документа под рукой?",
     sample: "Попробуйте на нашем примере",
     steps: ["Читаем документ", "ИИ проверяет", "Ставим печать", "Сохраняем навсегда"],
     wait: "несколько секунд…",
-    tooBig: (name, size) => `Файл ${name} весит ${size}. Максимум 5 МБ.`,
+    tooBig: (name, size) => `Файл ${name} весит ${size}. Максимум 4 МБ.`,
     note: "ИИ в демо-версии имитирован. Печать настоящая.",
   },
   cert: {
@@ -272,7 +282,7 @@ const ru: Messages = {
     problems: "Проблем",
     status: {
       OK: { label: "Подлинный", note: "" },
-      HASH_ONLY: { label: "Только печать", note: "Содержимое хранит владелец." },
+      HASH_ONLY: { label: "Только печать", note: "" },
       MISSING_IN_DATABASE: { label: "Удалён", note: "Удалён из базы, но печать осталась." },
       DATA_MODIFIED: { label: "Изменён", note: "Изменён после печати." },
       CHAIN_BROKEN: { label: "Нарушен", note: "Нарушен порядок журнала." },
@@ -294,7 +304,17 @@ const ru: Messages = {
     expertButton: "Открыть независимую проверку",
   },
   footer: { chain: "Печати хранятся в блокчейне Solana.", demo: "ИИ в демо-версии имитирован." },
-  errors: { generic: "Что-то пошло не так. Попробуйте ещё раз." },
+  errors: {
+    generic: "Что-то пошло не так. Попробуйте ещё раз.",
+    codes: {
+      too_large: "Файл больше 4 МБ.",
+      unreadable_pdf: "Не получилось прочитать PDF. Возможно, он повреждён или защищён паролем.",
+      unsupported_type: "Загрузите файл PDF или TXT.",
+      no_text: "В документе нет текста. Сканы пока не поддерживаются.",
+      no_file: "Выберите файл для загрузки.",
+      bad_request: "Не получилось загрузить файл. Попробуйте ещё раз.",
+    },
+  },
 };
 
 const kk: Messages = {
@@ -349,12 +369,12 @@ const kk: Messages = {
     lead: "Шартты жүктеңіз. ЖИ оны тәуекелдерге тексереді, ал сіз жіберуге болатын мөрленген сертификат аласыз.",
     drop: "PDF немесе TXT файлын осында сүйреңіз",
     choose: "Файл таңдау",
-    limit: "5 МБ-қа дейін",
+    limit: "4 МБ-қа дейін",
     sampleQ: "Құжат жоқ па?",
     sample: "Біздің мысалда байқап көріңіз",
     steps: ["Құжатты оқып жатырмыз", "ЖИ тексеріп жатыр", "Мөр басып жатырмыз", "Мәңгіге сақтап жатырмыз"],
     wait: "бірнеше секунд…",
-    tooBig: (name, size) => `${name} файлының көлемі ${size}. Ең көбі 5 МБ.`,
+    tooBig: (name, size) => `${name} файлының көлемі ${size}. Ең көбі 4 МБ.`,
     note: "Демо нұсқада ЖИ имитацияланған. Мөр шынайы.",
   },
   cert: {
@@ -417,7 +437,7 @@ const kk: Messages = {
     problems: "Мәселе",
     status: {
       OK: { label: "Түпнұсқа", note: "" },
-      HASH_ONLY: { label: "Тек мөр", note: "Мазмұнын иесі сақтайды." },
+      HASH_ONLY: { label: "Тек мөр", note: "" },
       MISSING_IN_DATABASE: { label: "Жойылған", note: "Дерекқордан жойылған, бірақ мөр қалды." },
       DATA_MODIFIED: { label: "Өзгертілген", note: "Мөрден кейін өзгертілген." },
       CHAIN_BROKEN: { label: "Бұзылған", note: "Журнал реті бұзылған." },
@@ -439,7 +459,17 @@ const kk: Messages = {
     expertButton: "Тәуелсіз тексеруді ашу",
   },
   footer: { chain: "Мөрлер Solana блокчейнінде сақталады.", demo: "Демо нұсқада ЖИ имитацияланған." },
-  errors: { generic: "Бірдеңе дұрыс болмады. Қайталап көріңіз." },
+  errors: {
+    generic: "Бірдеңе дұрыс болмады. Қайталап көріңіз.",
+    codes: {
+      too_large: "Файл 4 МБ-тан үлкен.",
+      unreadable_pdf: "PDF файлын оқу мүмкін болмады. Ол бүлінген немесе құпиясөзбен қорғалған болуы мүмкін.",
+      unsupported_type: "PDF немесе TXT файлын жүктеңіз.",
+      no_text: "Құжатта мәтін жоқ. Сканерленген файлдар әзірге қолдау көрмейді.",
+      no_file: "Жүктеу үшін файл таңдаңыз.",
+      bad_request: "Файлды жүктеу мүмкін болмады. Қайталап көріңіз.",
+    },
+  },
 };
 
 export const MESSAGES: Record<Locale, Messages> = { en, ru, kk };

@@ -6,9 +6,11 @@ import { getServices } from "@/lib/services";
 
 export async function POST(req: Request) {
   try {
-    const form = await req.formData();
+    const form = await req.formData().catch(() => {
+      throw new ValidationError("Send the file as multipart/form-data in a field named file", "bad_request");
+    });
     const file = form.get("file");
-    if (!(file instanceof File)) throw new ValidationError("Choose a file to upload");
+    if (!(file instanceof File)) throw new ValidationError("Choose a file to upload", "no_file");
     const field = (key: string) => {
       const v = form.get(key);
       return typeof v === "string" && v.trim() ? v.trim() : undefined;

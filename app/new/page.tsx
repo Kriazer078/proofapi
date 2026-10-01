@@ -6,7 +6,7 @@ import { useI18n } from "@/components/i18n";
 import { Icon, Panel } from "@/components/ui";
 import { formatBytes } from "@/lib/format";
 
-const MAX_BYTES = 5 * 1024 * 1024;
+const MAX_BYTES = 4 * 1024 * 1024;
 
 type Phase = { kind: "idle" } | { kind: "working"; step: number; name: string } | { kind: "error"; message: string };
 
@@ -35,7 +35,7 @@ export default function NewProofPage() {
     try {
       const res = await fetch("/api/proofs", { method: "POST", body });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? t.errors.generic);
+      if (!res.ok) throw new Error((json.code && t.errors.codes[json.code]) || json.error || t.errors.generic);
       router.push(`/proof/${json.proof.id}?demo`);
     } catch (e) {
       setPhase({ kind: "error", message: e instanceof Error ? e.message : t.errors.generic });

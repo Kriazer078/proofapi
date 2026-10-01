@@ -24,6 +24,15 @@ describe("MockAIProvider", () => {
     const text = "termination liability payment penalty indemnification confidential auto-renew ".repeat(500);
     expect((await ai.analyze(text)).riskScore).toBe(81);
   });
+  it("understands Russian contracts", async () => {
+    const result = await ai.analyze("Договор. Расторжение за 7 дней. Ответственность без ограничений. Оплата в течение 60 дней. Штраф 5%.");
+    expect(result.issues).toEqual(["Termination clause", "Liability risk", "Payment condition", "Penalty clause"]);
+    expect(result.riskScore).toBe(43);
+  });
+  it("understands Kazakh contracts", async () => {
+    const result = await ai.analyze("Шартты бұзу 7 күн бұрын. Жауапкершілік шектелмейді. Төлем 60 күн ішінде.");
+    expect(result.issues).toEqual(["Termination clause", "Liability risk", "Payment condition"]);
+  });
   it("identifies itself as a mock", () => {
     expect(ai.name).toBe("mock");
     expect(ai.model).toBe("proofapi-mock-v1");

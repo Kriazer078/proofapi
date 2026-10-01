@@ -1,6 +1,9 @@
-/** Invalid input from the caller. Maps to HTTP 400. */
+/** Invalid input from the caller. Maps to HTTP 400. `code` lets the interface show the message in the viewer's language. */
 export class ValidationError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
     super(message);
     this.name = "ValidationError";
   }
