@@ -1,6 +1,6 @@
 # ProofAPI — Tamper-Evident Receipts for AI Answers
 
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
+[![CI](https://github.com/Kriazer078/proofapi/actions/workflows/ci.yml/badge.svg)](https://github.com/Kriazer078/proofapi/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-14F195.svg)](LICENSE)
 [![Solana](https://img.shields.io/badge/Solana-devnet-9945FF)](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
 [![Hackathon](https://img.shields.io/badge/Colosseum-2026-14F195)](https://colosseum.org)
@@ -126,8 +126,8 @@ Clients' contracts can't be published on a blockchain.
 **Prerequisites:** Node.js 20+. No Rust toolchain is needed: the program is built in [Solana Playground](https://beta.solpg.io).
 
 ```bash
-git clone https://github.com/OWNER/REPO
-cd REPO
+git clone https://github.com/Kriazer078/proofapi
+cd proofapi
 npm install
 cp .env.example .env
 npm run db:push
