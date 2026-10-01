@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useI18n } from "./i18n";
+import { SealStamp } from "./seal-stamp";
 import { Icon } from "./ui";
 
 async function sha256(text: string): Promise<string> {
@@ -9,10 +10,10 @@ async function sha256(text: string): Promise<string> {
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/** A 4-group code people can compare by eye, derived from the real SHA-256. */
-const sealCode = (hex: string) => (hex ? hex.slice(0, 16).toUpperCase().match(/.{4}/g)!.join(" ") : "···· ···· ···· ····");
+/** First 16 hex characters of the real SHA-256, in four blocks people can compare by eye. */
+const blocks = (hex: string) => (hex ? hex.slice(0, 16).toUpperCase().match(/.{4}/g)! : ["····", "····", "····", "····"]);
 
-/** Edit the AI answer and watch its seal stop matching. Hashes are real SHA-256. */
+/** Edit the AI answer and watch the seal code stop matching. Hashes are real SHA-256. */
 export function TamperDemo() {
   const { t } = useI18n();
   const original = t.demo.lines;
@@ -33,9 +34,11 @@ export function TamperDemo() {
   }, [isEdited, t]);
 
   const match = recorded !== "" && recorded === current;
+  const rec = blocks(recorded);
+  const now = blocks(current);
 
   return (
-    <div className="grid gap-6 md:grid-cols-[1.2fr_1fr] md:items-center">
+    <div className="grid gap-6 md:grid-cols-[1.2fr_1fr] md:items-stretch">
       <div className="rounded-2xl border border-line bg-panel/80 p-5">
         <div className="text-xs font-medium text-faint">{t.demo.label}</div>
         <dl className="mt-3 grid gap-2 text-[15px]">
@@ -59,25 +62,38 @@ export function TamperDemo() {
         </button>
       </div>
 
-      <div
-        key={String(match)}
-        role="status"
-        className={`flex flex-col items-center rounded-2xl border px-6 py-8 text-center ${match ? "border-ok/25 bg-ok/[0.06]" : "animate-shake border-bad/30 bg-bad/[0.07]"}`}
-      >
-        <span className={`grid size-14 place-items-center rounded-full ${match ? "bg-ok text-bg" : "bg-bad text-bg"}`}>
-          <Icon name={match ? "check" : "x"} className="size-7" />
-        </span>
-        <div className={`mt-4 text-lg font-semibold ${match ? "text-ok" : "text-bad"}`}>{match ? t.demo.ok : t.demo.bad}</div>
-        <div className="mt-5 grid w-full gap-1.5 font-mono text-sm">
-          <div className="flex justify-between gap-3 text-muted">
-            <span>{t.demo.seal}</span>
-            <span>{sealCode(recorded)}</span>
-          </div>
-          <div className={`flex justify-between gap-3 ${match ? "text-muted" : "text-bad"}`}>
-            <span>{t.cert.now}</span>
-            <span>{sealCode(current)}</span>
-          </div>
+      <div role="status" className="flex flex-col justify-between gap-6 rounded-2xl border border-line bg-panel/80 p-5">
+        <div className="flex items-center gap-4">
+          <SealStamp
+            state={recorded ? (match ? "ok" : "bad") : "checking"}
+            word={match ? t.mk.seal.genuine : t.mk.seal.changed}
+            ring={t.mk.seal.ring}
+            size={84}
+          />
+          <div className={`text-lg font-semibold ${match ? "text-ok" : "text-bad"}`}>{match ? t.demo.ok : t.demo.bad}</div>
         </div>
+        <div className="grid gap-3 font-mono text-sm">
+          <CodeRow label={t.demo.seal} codes={rec} />
+          <CodeRow label={t.cert.now} codes={now} compare={rec} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CodeRow({ label, codes, compare }: { label: string; codes: string[]; compare?: string[] }) {
+  return (
+    <div>
+      <div className="mb-1.5 font-sans text-xs text-faint">{label}</div>
+      <div className="grid grid-cols-4 gap-1.5">
+        {codes.map((c, i) => {
+          const differs = compare !== undefined && compare[i] !== c;
+          return (
+            <span key={i} className={`rounded-md border px-2 py-1 text-center transition-colors ${differs ? "border-bad/40 bg-bad/10 text-bad" : "border-line-strong text-muted"}`}>
+              {c}
+            </span>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import { MARKETING, type Marketing } from "./marketing";
+
 /** All interface copy. Plain words for people who have never used a blockchain. */
 
 export const LOCALES = ["en", "ru", "kk"] as const;
@@ -99,6 +101,12 @@ const en = {
     checksTitle: "What we checked",
     checks: { input: "The document is the same", output: "The AI answer is unchanged", seal: "The seal is genuine", journal: "Nothing was removed from the journal" },
     checksFailed: { input: "The document was changed", output: "The AI answer was changed", seal: "The seal doesn't match", journal: "The journal is broken" },
+    checkRows: {
+      input: ["Document", "the same", "changed"],
+      output: ["AI answer", "unchanged", "changed"],
+      seal: ["Seal", "genuine", "doesn't match"],
+      journal: ["Journal", "complete", "broken"],
+    } as Record<"input" | "output" | "seal" | "journal", [string, string, string]>,
     note: "A certificate proves the answer hasn't changed. It doesn't prove the AI is right.",
     expert: "Details for specialists",
     recordNo: "Record number",
@@ -164,9 +172,10 @@ const en = {
   },
 };
 
-export type Messages = typeof en;
+type BaseMessages = typeof en;
+export type Messages = BaseMessages & { mk: Marketing };
 
-const ru: Messages = {
+const ru: BaseMessages = {
   nav: { check: "Проверить", journal: "Журнал", cta: "Получить сертификат", language: "Язык", menu: "Меню" },
   home: {
     title: "Докажите, что ответ ИИ не подделан",
@@ -260,6 +269,12 @@ const ru: Messages = {
     checksTitle: "Что мы проверили",
     checks: { input: "Документ тот же", output: "Ответ ИИ не изменён", seal: "Печать настоящая", journal: "Из журнала ничего не удалено" },
     checksFailed: { input: "Документ изменили", output: "Ответ ИИ изменили", seal: "Печать не совпадает", journal: "Журнал нарушен" },
+    checkRows: {
+      input: ["Документ", "тот же", "изменён"],
+      output: ["Ответ ИИ", "не изменён", "изменён"],
+      seal: ["Печать", "настоящая", "не совпадает"],
+      journal: ["Журнал", "полный", "нарушен"],
+    },
     note: "Сертификат доказывает, что ответ не меняли. Он не доказывает, что ИИ прав.",
     expert: "Подробнее для специалистов",
     recordNo: "Номер записи",
@@ -325,7 +340,7 @@ const ru: Messages = {
   },
 };
 
-const kk: Messages = {
+const kk: BaseMessages = {
   nav: { check: "Тексеру", journal: "Журнал", cta: "Сертификат алу", language: "Тіл", menu: "Мәзір" },
   home: {
     title: "ЖИ жауабы жалған емес екенін дәлелдеңіз",
@@ -419,6 +434,12 @@ const kk: Messages = {
     checksTitle: "Біз нені тексердік",
     checks: { input: "Құжат сол қалпында", output: "ЖИ жауабы өзгермеген", seal: "Мөр түпнұсқа", journal: "Журналдан ештеңе жойылмаған" },
     checksFailed: { input: "Құжат өзгертілген", output: "ЖИ жауабы өзгертілген", seal: "Мөр сәйкес емес", journal: "Журнал бұзылған" },
+    checkRows: {
+      input: ["Құжат", "сол қалпында", "өзгертілген"],
+      output: ["ЖИ жауабы", "өзгермеген", "өзгертілген"],
+      seal: ["Мөр", "түпнұсқа", "сәйкес емес"],
+      journal: ["Журнал", "толық", "бұзылған"],
+    },
     note: "Сертификат жауаптың өзгермегенін дәлелдейді. Ол ЖИ-дің дұрыс екенін дәлелдемейді.",
     expert: "Мамандарға арналған мәліметтер",
     recordNo: "Жазба нөмірі",
@@ -484,7 +505,11 @@ const kk: Messages = {
   },
 };
 
-export const MESSAGES: Record<Locale, Messages> = { en, ru, kk };
+export const MESSAGES: Record<Locale, Messages> = {
+  en: { ...en, mk: MARKETING.en },
+  ru: { ...ru, mk: MARKETING.ru },
+  kk: { ...kk, mk: MARKETING.kk },
+};
 
 /** Mock AI issue names, translated for display. */
 export const ISSUE_NAMES: Record<Locale, Record<string, string>> = {

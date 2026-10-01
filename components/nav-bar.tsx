@@ -14,9 +14,11 @@ export function NavBar() {
 
   const links = [
     { href: "/verify", label: t.nav.check },
+    { href: "/developers", label: t.mk.nav.developers },
+    { href: "/#pricing", label: t.mk.nav.pricing },
     { href: "/history", label: t.nav.journal },
   ];
-  const active = (href: string) => path.startsWith(href);
+  const active = (href: string) => !href.includes("#") && path.startsWith(href);
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/70 backdrop-blur-xl">
@@ -31,13 +33,13 @@ export function NavBar() {
               key={l.href}
               href={l.href}
               aria-current={active(l.href) ? "page" : undefined}
-              className={`hidden rounded-md px-3 py-1.5 transition-colors hover:text-fg sm:inline-flex ${active(l.href) ? "text-fg" : "text-muted"}`}
+              className={`hidden rounded-md px-3 py-1.5 transition-colors hover:text-fg lg:inline-flex ${active(l.href) ? "text-fg" : "text-muted"}`}
             >
               {l.label}
             </Link>
           ))}
           <LanguageSwitcher />
-          <Link href="/new" className="ml-1 hidden h-8 items-center whitespace-nowrap rounded-lg bg-fg px-3 text-sm font-medium text-bg transition-colors hover:bg-white sm:inline-flex">
+          <Link href="/new" className="ml-1 hidden h-8 items-center whitespace-nowrap rounded-lg bg-fg px-3 text-sm font-medium text-bg transition-colors hover:bg-white lg:inline-flex">
             {t.nav.cta}
           </Link>
           <button
@@ -46,7 +48,7 @@ export function NavBar() {
             aria-expanded={menu}
             aria-controls="mobile-menu"
             aria-label={t.nav.menu}
-            className="grid size-8 place-items-center rounded-lg border border-line-strong text-muted sm:hidden"
+            className="grid size-8 place-items-center rounded-lg border border-line-strong text-muted lg:hidden"
           >
             <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
               {menu ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
@@ -55,7 +57,7 @@ export function NavBar() {
         </div>
       </nav>
       {menu && (
-        <div id="mobile-menu" className="border-t border-line px-5 pt-2 pb-5 sm:hidden">
+        <div id="mobile-menu" className="border-t border-line px-5 pt-2 pb-5 lg:hidden">
           {links.map((l) => (
             <Link key={l.href} href={l.href} className={`block py-3 text-lg ${active(l.href) ? "text-fg" : "text-muted"}`}>
               {l.label}

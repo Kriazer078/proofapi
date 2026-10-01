@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useI18n } from "@/components/i18n";
 import { RiskGauge, riskLevel } from "@/components/risk-gauge";
 import { Button, Hash, Icon, LinkButton, Panel } from "@/components/ui";
-import { VerdictMark, type VerdictState } from "@/components/verdict-mark";
+import { SealStamp, type SealState } from "@/components/seal-stamp";
 import { ISSUE_NAMES, formatDate } from "@/lib/i18n/messages";
 import type { PublicProof } from "@/lib/public-proof";
 import type { VerificationResult } from "@/lib/verifier";
@@ -86,7 +86,7 @@ export function ProofView({ initial, liveChain, issuerName, demo }: { initial: P
   const c = result?.checks;
   const changedParts = c ? (["input", "output", "metadata"] as const).filter((k) => !c[k].ok).map((k) => t.cert.parts[k]) : [];
 
-  const state: VerdictState = !result ? "checking" : result.status === "VERIFIED" ? "ok" : result.status === "NOT_ON_CHAIN" ? "pending" : "bad";
+  const state: SealState = !result ? "checking" : result.status === "VERIFIED" ? "ok" : result.status === "NOT_ON_CHAIN" ? "pending" : "bad";
   const view = {
     checking: { title: t.cert.checking, text: t.cert.checkingText, color: "text-fg", box: "border-line" },
     ok: { title: t.cert.genuine, text: t.cert.genuineText(sealedText), color: "text-ok", box: "border-ok/25 bg-ok/[0.05]" },
@@ -99,17 +99,15 @@ export function ProofView({ initial, liveChain, issuerName, demo }: { initial: P
     pending: { title: t.cert.pending, text: t.cert.pendingText, color: "text-warn", box: "border-warn/30 bg-warn/[0.05]" },
   }[state];
 
-  // Each row states what is true: "unchanged" when it passed, "was changed" when it failed.
-  const checks = c
-    ? (
-        [
-          ["input", c.input.ok],
-          ["output", c.output.ok],
-          ["seal", c.metadata.ok && c.record.ok && c.issuer.ok],
-          ["journal", c.chain.ok],
-        ] as const
-      ).map(([key, ok]) => ({ label: ok ? t.cert.checks[key] : t.cert.checksFailed[key], ok }))
-    : null;
+  // Rows read like a receipt: what was checked, then its state in plain words.
+  const rowOk: Record<keyof typeof t.cert.checkRows, boolean | undefined> = {
+    input: c?.input.ok,
+    output: c?.output.ok,
+    seal: c ? c.metadata.ok && c.record.ok && c.issuer.ok : undefined,
+    journal: c?.chain.ok,
+  };
+  const sealWord = { checking: "", ok: t.mk.seal.genuine, bad: t.mk.seal.changed, pending: t.mk.seal.pending }[state];
+  const sealDate = mounted && state === "ok" ? new Date(sealedAt * 1000).toLocaleDateString("ru-RU") : undefined;
 
   return (
     <div className="pt-10">
@@ -119,8 +117,8 @@ export function ProofView({ initial, liveChain, issuerName, demo }: { initial: P
 
       {/* Status */}
       <section className={`mt-6 flex flex-col gap-6 rounded-3xl border p-6 sm:p-8 md:flex-row md:items-center md:justify-between ${view.box}`}>
-        <div className="flex items-center gap-5">
-          <VerdictMark state={state} />
+        <div className="flex items-center gap-6">
+          <SealStamp state={state} word={sealWord} date={sealDate} ring={t.mk.seal.ring} />
           <div>
             <h1 className={`text-4xl font-semibold tracking-[-0.03em] ${view.color}`} role="status">
               {view.title}
@@ -189,20 +187,18 @@ export function ProofView({ initial, liveChain, issuerName, demo }: { initial: P
         {/* What we checked */}
         <Panel className="p-6 sm:p-7">
           <h2 className="text-sm font-medium text-muted">{t.cert.checksTitle}</h2>
-          <ul className="mt-4 grid gap-1">
-            {(checks ?? Object.values(t.cert.checks).map((label) => ({ label, ok: undefined as boolean | undefined }))).map((row) => (
-              <li key={row.label} className="flex items-center gap-3 py-2.5">
-                <span
-                  className={`grid size-7 shrink-0 place-items-center rounded-full ${
-                    row.ok === undefined ? "border border-line-strong" : row.ok ? "bg-ok/15 text-ok" : "bg-bad/15 text-bad"
-                  }`}
-                >
-                  {row.ok === undefined ? <span className="size-1.5 rounded-full bg-faint animate-pulse-dot" /> : <Icon name={row.ok ? "check" : "x"} />}
-                </span>
-                <span className={row.ok === false ? "text-bad" : ""}>{row.label}</span>
-              </li>
-            ))}
-          </ul>
+          <dl className="mt-4 border-y border-dashed border-line-strong">
+            {(Object.keys(t.cert.checkRows) as (keyof typeof t.cert.checkRows)[]).map((key) => {
+              const [name, good, badWord] = t.cert.checkRows[key];
+              const ok = rowOk[key];
+              return (
+                <div key={key} className="flex items-baseline justify-between gap-4 border-b border-dashed border-line py-3 last:border-b-0">
+                  <dt className="text-muted">{name}</dt>
+                  <dd className={`font-medium ${ok === undefined ? "text-faint" : ok ? "text-ok" : "text-bad"}`}>{ok === undefined ? "…" : ok ? good : badWord}</dd>
+                </div>
+              );
+            })}
+          </dl>
           <p className="mt-5 border-t border-line pt-4 text-sm text-faint">{t.cert.note}</p>
         </Panel>
       </div>
