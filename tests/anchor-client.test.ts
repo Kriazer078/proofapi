@@ -114,3 +114,20 @@ describe("AnchorChainClient", () => {
     });
   });
 });
+
+describe("AnchorChainClient batch reads", () => {
+  it("reads a range of records in batches of at most 100 accounts", async () => {
+    const { client, rpc } = await setup();
+    for (let i = 0; i < 3; i++) await client.anchorProof(input(i));
+    let calls = 0;
+    const original = rpc.getAccounts.bind(rpc);
+    rpc.getAccounts = async (keys) => {
+      calls++;
+      expect(keys.length).toBeLessThanOrEqual(100);
+      return original(keys);
+    };
+    const records = await client.readProofRange(0, 5);
+    expect(records.map((r) => r?.sequence ?? null)).toEqual([0, 1, 2, null, null]);
+    expect(calls).toBe(1);
+  });
+});

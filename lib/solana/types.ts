@@ -51,6 +51,8 @@ export interface ChainClient {
   readIssuer(): Promise<IssuerState | null>;
   anchorProof(p: AnchorInput): Promise<AnchorResult>;
   readProofBySequence(sequence: number): Promise<ChainProofRecord | null>;
+  /** Records start … start+count-1 in order, null where missing. Batched so long histories stay fast. */
+  readProofRange(start: number, count: number): Promise<(ChainProofRecord | null)[]>;
   readProofAccount(account: string): Promise<ChainProofRecord | null>;
   explorerUrl(signature: string): string | null;
   accountUrl(account: string): string | null;

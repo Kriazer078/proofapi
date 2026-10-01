@@ -85,6 +85,10 @@ export class InMemoryChainClient implements ChainClient {
     return record ? { ...record } : null;
   }
 
+  async readProofRange(start: number, count: number): Promise<(ChainProofRecord | null)[]> {
+    return Promise.all(Array.from({ length: count }, (_, i) => this.readProofBySequence(start + i)));
+  }
+
   async readProofAccount(account: string): Promise<ChainProofRecord | null> {
     const match = /^memory:(\d+)$/.exec(account);
     return match ? this.readProofBySequence(Number(match[1])) : null;

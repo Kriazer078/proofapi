@@ -76,6 +76,10 @@ export class FakeProgramRpc implements SolanaRpc {
     return a ? { owner: a.owner, data: Buffer.from(a.data) } : null;
   }
 
+  async getAccounts(addresses: PublicKey[]): Promise<(AccountData | null)[]> {
+    return Promise.all(addresses.map((a) => this.getAccount(a)));
+  }
+
   async send(ix: TransactionInstruction, signers: Keypair[]): Promise<string> {
     if (this.failNextSend) {
       const e = this.failNextSend;

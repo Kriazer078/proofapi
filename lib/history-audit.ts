@@ -40,8 +40,9 @@ export async function auditHistory(deps: { repo: ProofRepo; chain: ChainClient }
 
   const entries: AuditEntry[] = [];
   let prevHash = ZERO_HASH;
-  for (let seq = 0; seq < (issuer?.proofCount ?? 0); seq++) {
-    const record = await deps.chain.readProofBySequence(seq);
+  const records = await deps.chain.readProofRange(0, issuer?.proofCount ?? 0);
+  for (let seq = 0; seq < records.length; seq++) {
+    const record = records[seq];
     const row = bySequence.get(seq) ?? null;
     const base = { sequence: seq, dbId: row?.id ?? null, fileName: row?.inputFileName ?? null };
     if (!record) {

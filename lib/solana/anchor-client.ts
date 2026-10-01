@@ -73,6 +73,25 @@ export class AnchorChainClient implements ChainClient {
     return this.readProofAccount(proofPda(this.o.programId, this.issuer, sequence).toBase58());
   }
 
+  async readProofRange(start: number, count: number): Promise<(ChainProofRecord | null)[]> {
+    const out: (ChainProofRecord | null)[] = [];
+    for (let from = start; from < start + count; from += 100) {
+      const keys = Array.from({ length: Math.min(100, start + count - from) }, (_, i) => proofPda(this.o.programId, this.issuer, from + i));
+      const accounts = await this.o.rpc.getAccounts(keys);
+      accounts.forEach((acc, i) => out.push(this.decodeRecord(keys[i], acc)));
+    }
+    return out;
+  }
+
+  private decodeRecord(key: PublicKey, account: AccountData | null): ChainProofRecord | null {
+    if (!this.ours(account)) return null;
+    try {
+      return decodeProofRecord(key, account.data);
+    } catch {
+      return null;
+    }
+  }
+
   async readProofAccount(account: string): Promise<ChainProofRecord | null> {
     let key: PublicKey;
     try {
@@ -80,13 +99,7 @@ export class AnchorChainClient implements ChainClient {
     } catch {
       return null;
     }
-    const data = await this.o.rpc.getAccount(key);
-    if (!this.ours(data)) return null;
-    try {
-      return decodeProofRecord(key, data.data);
-    } catch {
-      return null;
-    }
+    return this.decodeRecord(key, await this.o.rpc.getAccount(key));
   }
 
   explorerUrl(signature: string): string | null {

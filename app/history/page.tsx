@@ -5,6 +5,9 @@ import { getMessages } from "@/lib/i18n/server";
 import { currentOwnerHash } from "@/lib/request-access";
 import { getServices } from "@/lib/services";
 
+/** Writes and reads go to Solana; give them time on serverless hosts. */
+export const maxDuration = 60;
+
 export const dynamic = "force-dynamic";
 
 const TONE: Record<AuditStatus, "ok" | "bad" | "neutral"> = {

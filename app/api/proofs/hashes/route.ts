@@ -5,6 +5,9 @@ import { toPublicProof } from "@/lib/public-proof";
 import { admitUpload } from "@/lib/request-access";
 import { getServices } from "@/lib/services";
 
+/** Writes and reads go to Solana; give them time on serverless hosts. */
+export const maxDuration = 60;
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
