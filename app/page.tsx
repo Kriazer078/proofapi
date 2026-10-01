@@ -34,18 +34,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Trust: facts a visitor can check, no invented logos or numbers */}
-      <ul className="flex flex-wrap gap-x-8 gap-y-2 border-y border-line py-5 text-sm text-muted">
-        {mk.trust.map((item) => (
-          <li key={item} className="flex items-center gap-2">
-            <span className="size-1 rounded-full bg-sol-green" aria-hidden="true" />
-            {item}
-          </li>
-        ))}
-      </ul>
-
       {/* 2. How it works */}
-      <section className="py-20">
+      <section className="border-t border-line py-20">
         <h2 className="text-3xl font-semibold tracking-[-0.02em]">{t.home.howTitle}</h2>
         <ol className="mt-10 grid gap-8 md:grid-cols-3">
           {t.home.steps.map((s, i) => (
