@@ -11,6 +11,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   serverExternalPackages: ["pdf-parse"],
   poweredByHeader: false,
+  devIndicators: false,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

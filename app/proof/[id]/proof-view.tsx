@@ -99,13 +99,16 @@ export function ProofView({ initial, liveChain, issuerName, demo }: { initial: P
     pending: { title: t.cert.pending, text: t.cert.pendingText, color: "text-warn", box: "border-warn/30 bg-warn/[0.05]" },
   }[state];
 
+  // Each row states what is true: "unchanged" when it passed, "was changed" when it failed.
   const checks = c
-    ? [
-        { label: t.cert.checks.input, ok: c.input.ok },
-        { label: t.cert.checks.output, ok: c.output.ok },
-        { label: t.cert.checks.seal, ok: c.metadata.ok && c.record.ok && c.issuer.ok },
-        { label: t.cert.checks.journal, ok: c.chain.ok },
-      ]
+    ? (
+        [
+          ["input", c.input.ok],
+          ["output", c.output.ok],
+          ["seal", c.metadata.ok && c.record.ok && c.issuer.ok],
+          ["journal", c.chain.ok],
+        ] as const
+      ).map(([key, ok]) => ({ label: ok ? t.cert.checks[key] : t.cert.checksFailed[key], ok }))
     : null;
 
   return (
