@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { AIUnavailableError, ForbiddenError, NotFoundError, RateLimitError, ValidationError } from "./errors";
+import { AIUnavailableError, ForbiddenError, NotFoundError, RateLimitError, UnauthorizedError, ValidationError } from "./errors";
 
 export function errorResponse(e: unknown): NextResponse {
   if (e instanceof ValidationError) return NextResponse.json({ error: e.message, code: e.code }, { status: 400 });
   if (e instanceof NotFoundError) return NextResponse.json({ error: e.message }, { status: 404 });
   if (e instanceof ForbiddenError) return NextResponse.json({ error: e.message, code: e.code }, { status: 403 });
+  if (e instanceof UnauthorizedError) return NextResponse.json({ error: e.message, code: e.code }, { status: 401 });
   if (e instanceof AIUnavailableError) return NextResponse.json({ error: e.message, code: e.code }, { status: 503 });
   if (e instanceof RateLimitError) return NextResponse.json({ error: e.message, code: e.code }, { status: 429 });
   console.error(e);

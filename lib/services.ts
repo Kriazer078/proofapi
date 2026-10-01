@@ -1,4 +1,5 @@
 import { PrismaAccessStore } from "./access";
+import { type AccountStore, PrismaAccountStore } from "./accounts";
 import type { AIProvider } from "./ai-provider";
 import { createAIProvider } from "./ai-gemini";
 import { prisma } from "./db";
@@ -14,9 +15,15 @@ export function getAI(): AIProvider {
   return g.__proofapiAI;
 }
 
+/** Users and API keys. */
+export function getAccounts(): AccountStore {
+  return new PrismaAccountStore(prisma);
+}
+
 export function getServices() {
   const repo = new PrismaProofRepo(prisma);
   const chain = getChainClient();
   const proofs = createProofService({ repo, chain, ai: getAI() });
-  return { repo, chain, proofs, access: new PrismaAccessStore(prisma), deps: { repo, chain } };
+  return { repo, chain, proofs, access: new PrismaAccessStore(prisma),
+    accounts: getAccounts(), deps: { repo, chain } };
 }

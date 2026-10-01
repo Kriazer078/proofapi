@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useI18n } from "./i18n";
 import { SealStamp } from "./seal-stamp";
-import { Icon } from "./ui";
+import { Icon } from "./primitives";
 
 async function sha256(text: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));

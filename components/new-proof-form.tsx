@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/components/i18n";
-import { Icon, Panel } from "@/components/ui";
+import { Icon, Panel } from "@/components/primitives";
 import { formatBytes } from "@/lib/format";
 
 const MAX_BYTES = 4 * 1024 * 1024;

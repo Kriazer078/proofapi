@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "./ui";
+import { Icon } from "./primitives";
 
 /** A code sample with a copy button. Scrolls sideways inside itself on narrow screens. */
 export function CodeBlock({ code, label, copyLabel, copiedLabel }: { code: string; label?: string; copyLabel: string; copiedLabel: string }) {

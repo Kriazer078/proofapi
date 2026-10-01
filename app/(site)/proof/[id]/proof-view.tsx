@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useI18n } from "@/components/i18n";
 import { RiskGauge, riskLevel } from "@/components/risk-gauge";
-import { Button, Hash, Icon, LinkButton, Panel } from "@/components/ui";
+import { Button, Hash, Icon, LinkButton, Panel } from "@/components/primitives";
 import { SealStamp, type SealState } from "@/components/seal-stamp";
 import { ISSUE_NAMES, formatDate } from "@/lib/i18n/messages";
 import type { PublicProof } from "@/lib/public-proof";

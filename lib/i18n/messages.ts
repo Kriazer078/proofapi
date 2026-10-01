@@ -1,3 +1,5 @@
+import { CONSOLE, type ConsoleCopy } from "./console";
+import { LANDING, type Landing } from "./landing";
 import { MARKETING, type Marketing } from "./marketing";
 
 /** All interface copy. Plain words for people who have never used a blockchain. */
@@ -175,7 +177,7 @@ const en = {
 };
 
 type BaseMessages = typeof en;
-export type Messages = BaseMessages & { mk: Marketing };
+export type Messages = BaseMessages & { mk: Marketing; lp: Landing; cs: ConsoleCopy };
 
 const ru: BaseMessages = {
   nav: { check: "Проверить", journal: "Журнал", cta: "Получить сертификат", language: "Язык", menu: "Меню" },
@@ -512,9 +514,9 @@ const kk: BaseMessages = {
 };
 
 export const MESSAGES: Record<Locale, Messages> = {
-  en: { ...en, mk: MARKETING.en },
-  ru: { ...ru, mk: MARKETING.ru },
-  kk: { ...kk, mk: MARKETING.kk },
+  en: { ...en, mk: MARKETING.en, lp: LANDING.en, cs: CONSOLE.en },
+  ru: { ...ru, mk: MARKETING.ru, lp: LANDING.ru, cs: CONSOLE.ru },
+  kk: { ...kk, mk: MARKETING.kk, lp: LANDING.kk, cs: CONSOLE.kk },
 };
 
 /** Mock AI issue names, translated for display. */

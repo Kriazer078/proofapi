@@ -1,5 +1,5 @@
 import { CodeBlock } from "@/components/code-block";
-import { Icon, LinkButton } from "@/components/ui";
+import { Icon, LinkButton } from "@/components/primitives";
 import { GITHUB_URL } from "@/lib/i18n/marketing";
 import { getMessages } from "@/lib/i18n/server";
 

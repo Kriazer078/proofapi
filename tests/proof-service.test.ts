@@ -128,3 +128,36 @@ describe("demo actions", () => {
     await expect(service.retryAnchoring("missing")).rejects.toBeInstanceOf(NotFoundError);
   });
 });
+
+describe("createSealProof", () => {
+  it("seals any AI answer as given, without running our AI", async () => {
+    const { service, chain } = setup();
+    const { proof, chainError } = await service.createSealProof({
+      input: "Claim 48213: damage reported 14.09, policy starts 01.10",
+      output: "Decision: deny. Reason: outside the coverage period.",
+      model: "gemini-3.5-flash-lite",
+      label: "Claim 48213",
+    });
+    expect(chainError).toBeNull();
+    expect(proof).toMatchObject({ status: "ANCHORED", mode: "full", inputFileName: "Claim 48213", model: "gemini-3.5-flash-lite", provider: "client" });
+    expect(JSON.parse(proof.outputJson!)).toEqual({ answer: "Decision: deny. Reason: outside the coverage period." });
+    expect(JSON.parse(proof.metadataJson!)).toMatchObject({ task: "seal", model: "gemini-3.5-flash-lite", model_attestation: "declared" });
+    expect(proof.outputHash).toBe(saltedHash(SALT, proof.outputJson!));
+    expect((await chain.readProofBySequence(0))!.outputHash).toBe(proof.outputHash);
+  });
+
+  it("rejects empty or oversized input", async () => {
+    const { service } = setup();
+    await expect(service.createSealProof({ input: "", output: "x" })).rejects.toBeInstanceOf(ValidationError);
+    await expect(service.createSealProof({ input: "x", output: "y".repeat(200_001) })).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it("can be tampered with in the demo, which changes the answer", async () => {
+    const { service } = setup();
+    await service.createSealProof({ input: "in", output: "Decision: deny." });
+    const tampered = await service.tamperOutput(ID0);
+    expect(JSON.parse(tampered.outputJson!).answer).not.toBe("Decision: deny.");
+    const restored = await service.restoreOutput(ID0);
+    expect(JSON.parse(restored.outputJson!).answer).toBe("Decision: deny.");
+  });
+});

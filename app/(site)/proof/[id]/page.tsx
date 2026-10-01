@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { toPublicProof } from "@/lib/public-proof";
-import { currentOwnerHash } from "@/lib/request-access";
+import { isOwner } from "@/lib/request-access";
 import { getServices } from "@/lib/services";
 import { ProofView } from "./proof-view";
 
@@ -16,8 +16,7 @@ export default async function ProofPage({
   const { id } = await params;
   const { repo, chain, access } = getServices();
   // Tampering controls are for presentations: only with ?demo, and only in the browser that created the certificate.
-  const owner = await currentOwnerHash();
-  const demo = "demo" in (await searchParams) && owner !== null && (await access.owns(id, owner));
+  const demo = "demo" in (await searchParams) && (await isOwner(access, id));
   const row = await repo.get(id);
   if (!row) notFound();
   return (

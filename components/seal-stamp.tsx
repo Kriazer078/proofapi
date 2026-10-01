@@ -1,10 +1,10 @@
 export type SealState = "checking" | "ok" | "bad" | "pending";
 
 const COLOR: Record<SealState, string> = {
-  checking: "var(--color-faint)",
-  ok: "var(--color-ok)",
-  bad: "var(--color-bad)",
-  pending: "var(--color-warn)",
+  checking: "var(--faint)",
+  ok: "var(--seal)",
+  bad: "var(--destructive)",
+  pending: "var(--warn)",
 };
 
 /**

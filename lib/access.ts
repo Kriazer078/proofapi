@@ -6,6 +6,9 @@ export interface UploadRecord {
   proofId: string;
   ownerHash: string;
   ipHash: string;
+  /** Signed-in account or API key owner, when the upload was authenticated. */
+  userId?: string | null;
+  apiKeyId?: string | null;
   createdAt: Date;
 }
 
@@ -14,6 +17,9 @@ export interface AccessStore {
   owns(proofId: string, ownerHash: string): Promise<boolean>;
   ownedIds(ownerHash: string): Promise<string[]>;
   countSince(since: Date, ipHash?: string): Promise<number>;
+  countUserSince(userId: string, since: Date): Promise<number>;
+  userUploads(userId: string, since: Date, limit: number): Promise<UploadRecord[]>;
+  ownedByUser(proofId: string, userId: string): Promise<boolean>;
 }
 
 export interface RateLimits {
@@ -42,6 +48,17 @@ export async function checkRateLimit(store: AccessStore, ipHash: string, now: Da
   return (await store.countSince(dayAgo)) < limits.perDay;
 }
 
+/** Monthly allowance for signed-in accounts and API keys, counted from the first day of the UTC month. */
+export const MONTHLY_LIMIT = Number(process.env.BETA_MONTHLY_LIMIT ?? 1000);
+
+export function monthStart(now: Date): Date {
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+}
+
+export async function checkUserLimit(store: AccessStore, userId: string, now: Date, limit = MONTHLY_LIMIT): Promise<boolean> {
+  return (await store.countUserSince(userId, monthStart(now))) < limit;
+}
+
 export class MemoryAccessStore implements AccessStore {
   private readonly rows: UploadRecord[] = [];
 
@@ -60,13 +77,41 @@ export class MemoryAccessStore implements AccessStore {
   async countSince(since: Date, ipHash?: string): Promise<number> {
     return this.rows.filter((r) => r.createdAt > since && (ipHash === undefined || r.ipHash === ipHash)).length;
   }
+
+  async countUserSince(userId: string, since: Date): Promise<number> {
+    return this.rows.filter((r) => r.userId === userId && r.createdAt >= since).length;
+  }
+
+  async userUploads(userId: string, since: Date, limit: number): Promise<UploadRecord[]> {
+    return this.rows
+      .filter((r) => r.userId === userId && r.createdAt >= since)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit)
+      .map((r) => ({ ...r }));
+  }
+
+  async ownedByUser(proofId: string, userId: string): Promise<boolean> {
+    return this.rows.some((r) => r.proofId === proofId && r.userId === userId);
+  }
 }
 
 export class PrismaAccessStore implements AccessStore {
   constructor(private readonly db: PrismaClient) {}
 
   async record(r: UploadRecord): Promise<void> {
-    await this.db.upload.create({ data: r });
+    await this.db.upload.create({ data: { ...r, userId: r.userId ?? null, apiKeyId: r.apiKeyId ?? null } });
+  }
+
+  countUserSince(userId: string, since: Date): Promise<number> {
+    return this.db.upload.count({ where: { userId, createdAt: { gte: since } } });
+  }
+
+  userUploads(userId: string, since: Date, limit: number): Promise<UploadRecord[]> {
+    return this.db.upload.findMany({ where: { userId, createdAt: { gte: since } }, orderBy: { createdAt: "desc" }, take: limit });
+  }
+
+  async ownedByUser(proofId: string, userId: string): Promise<boolean> {
+    return (await this.db.upload.count({ where: { proofId, userId } })) > 0;
   }
 
   async owns(proofId: string, ownerHash: string): Promise<boolean> {

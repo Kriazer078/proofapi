@@ -42,9 +42,36 @@ model Upload {
   proofId   String   @id
   ownerHash String
   ipHash    String
+  userId    String?
+  apiKeyId  String?
   createdAt DateTime
 
   @@index([ownerHash])
   @@index([ipHash, createdAt])
   @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+/// A person signed in with GitHub. Owns API keys and the certificates created with them.
+model User {
+  id        String   @id
+  githubId  String   @unique
+  login     String
+  name      String?
+  avatarUrl String?
+  createdAt DateTime
+}
+
+/// An API key. Only its hash is stored; the full key is shown once at creation.
+model ApiKey {
+  id         String    @id
+  userId     String
+  name       String
+  keyHash    String    @unique
+  last4      String
+  createdAt  DateTime
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+
+  @@index([userId])
 }

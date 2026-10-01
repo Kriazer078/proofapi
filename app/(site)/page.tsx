@@ -1,7 +1,7 @@
 import { CodeBlock } from "@/components/code-block";
 import { SealStamp } from "@/components/seal-stamp";
 import { TamperDemo } from "@/components/tamper-demo";
-import { Icon, LinkButton } from "@/components/ui";
+import { Icon, LinkButton } from "@/components/primitives";
 import { CONTACT_URL } from "@/lib/i18n/marketing";
 import type { Messages } from "@/lib/i18n/messages";
 import { getMessages } from "@/lib/i18n/server";

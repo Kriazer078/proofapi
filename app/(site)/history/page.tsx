@@ -2,6 +2,7 @@ import Link from "next/link";
 import { type AuditStatus, auditHistory } from "@/lib/history-audit";
 import { formatDate } from "@/lib/i18n/messages";
 import { getMessages } from "@/lib/i18n/server";
+import { currentUser } from "@/lib/auth";
 import { currentOwnerHash } from "@/lib/request-access";
 import { getServices } from "@/lib/services";
 
@@ -25,7 +26,11 @@ export default async function JournalPage() {
   const audit = await auditHistory(deps);
   // Anyone sees that records exist and whether they are intact; names and links only for your own certificates.
   const owner = await currentOwnerHash();
-  const mine = new Set(owner ? await access.ownedIds(owner) : []);
+  const user = await currentUser();
+  const mine = new Set([
+    ...(owner ? await access.ownedIds(owner) : []),
+    ...(user ? (await access.userUploads(user.id, new Date(0), 500)).map((u) => u.proofId) : []),
+  ]);
   const entries = [...audit.entries].reverse();
 
   return (

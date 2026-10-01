@@ -1,10 +1,18 @@
 import { cookies, headers } from "next/headers";
-import { type AccessStore, checkRateLimit, hashSecret, newOwnerToken } from "./access";
-import { ForbiddenError, RateLimitError } from "./errors";
+import { type AccessStore, checkRateLimit, checkUserLimit, hashSecret, newOwnerToken } from "./access";
+import { type AccountStore, keyFromHeader } from "./accounts";
+import { currentUser } from "./auth";
+import { ForbiddenError, RateLimitError, UnauthorizedError } from "./errors";
 
 /** HttpOnly cookie holding a random token that marks the browser which created a certificate. */
 export const OWNER_COOKIE = "pa_owner";
 const TOKEN = /^[0-9a-f]{64}$/;
+
+/** Who is calling: an API key's owner, a signed-in console user, or an anonymous visitor (both null). */
+export interface Caller {
+  userId: string | null;
+  apiKeyId: string | null;
+}
 
 /** Hash of this browser's owner token, or null when it has none. Safe in server components. */
 export async function currentOwnerHash(): Promise<string | null> {
@@ -36,17 +44,47 @@ export async function clientIpHash(): Promise<string> {
   return hashSecret(`ip:${process.env.IP_HASH_SALT ?? ""}:${ip}`);
 }
 
-/** Checks the upload limits before a new certificate is created. */
-export async function admitUpload(access: AccessStore): Promise<{ ownerHash: string; ipHash: string }> {
-  const [ownerHash, ipHash] = [await ensureOwnerHash(), await clientIpHash()];
-  if (!(await checkRateLimit(access, ipHash, new Date()))) throw new RateLimitError();
-  return { ownerHash, ipHash };
+/**
+ * An `Authorization: Bearer pk_live_…` header wins; a key that is present but unknown or revoked is
+ * an error rather than a silent fall back to anonymous limits. Otherwise the console session counts.
+ */
+export async function resolveCaller(accounts: AccountStore): Promise<Caller> {
+  const key = keyFromHeader((await headers()).get("authorization"));
+  if (key) {
+    const record = await accounts.findActiveKey(hashSecret(key));
+    if (!record) throw new UnauthorizedError();
+    await accounts.touchKey(record.id, new Date());
+    return { userId: record.userId, apiKeyId: record.id };
+  }
+  const user = await currentUser();
+  return { userId: user?.id ?? null, apiKeyId: null };
 }
 
-/** Demo attacks (edit, restore, delete) are allowed only from the browser that created the certificate. */
-export async function requireOwner(access: AccessStore, proofId: string): Promise<void> {
+/** Checks limits before a new certificate is created: the monthly allowance for accounts, per-address limits otherwise. */
+export async function admitUpload(access: AccessStore, caller: Caller): Promise<{ ownerHash: string; ipHash: string; userId: string | null; apiKeyId: string | null }> {
+  const [ownerHash, ipHash] = [await ensureOwnerHash(), await clientIpHash()];
+  const now = new Date();
+  if (caller.userId) {
+    if (!(await checkUserLimit(access, caller.userId, now))) {
+      throw new RateLimitError("This account has used its monthly allowance. It renews on the 1st.", "monthly_limit");
+    }
+  } else if (!(await checkRateLimit(access, ipHash, now))) {
+    throw new RateLimitError();
+  }
+  return { ownerHash, ipHash, userId: caller.userId, apiKeyId: caller.apiKeyId };
+}
+
+/** True when this browser created the certificate or the signed-in account owns it. */
+export async function isOwner(access: AccessStore, proofId: string): Promise<boolean> {
   const ownerHash = await currentOwnerHash();
-  if (!ownerHash || !(await access.owns(proofId, ownerHash))) {
+  if (ownerHash && (await access.owns(proofId, ownerHash))) return true;
+  const user = await currentUser();
+  return user ? access.ownedByUser(proofId, user.id) : false;
+}
+
+/** Demo attacks (edit, restore, delete) are allowed only for the certificate's creator. */
+export async function requireOwner(access: AccessStore, proofId: string): Promise<void> {
+  if (!(await isOwner(access, proofId))) {
     throw new ForbiddenError("Only the browser that created this certificate can change it", "not_owner");
   }
 }
