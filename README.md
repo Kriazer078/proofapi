@@ -73,6 +73,8 @@ Clients' contracts can't be published on a blockchain.
 - English, Russian and Kazakh interface
 - Upload limits per address and per day to protect the server wallet
 
+![API guide for developers](assets/developers.png)
+
 ---
 
 ## Tech Stack
