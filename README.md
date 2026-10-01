@@ -161,7 +161,7 @@ npm run e2e:devnet       # create, verify, tamper, audit, and write an evidence 
 
 ## Resources
 
-- Live app: _coming soon_
+- Live app: https://proofapi.vercel.app
 - Demo video: _coming soon_
 - Presentation: _coming soon_
 - Program on Solana Explorer: [devnet](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
