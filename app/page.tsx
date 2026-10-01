@@ -32,7 +32,7 @@ export default async function HomePage() {
         <h2 className="text-3xl font-semibold tracking-[-0.02em]">{t.home.howTitle}</h2>
         <ol className="mt-10 grid gap-5 md:grid-cols-3">
           {t.home.steps.map((s, i) => (
-            <li key={s.title} className="rounded-2xl border border-line bg-panel/60 p-6">
+            <li key={s.title}>
               <StepPicture step={i} t={t} />
               <div className="mt-6 flex items-center gap-3">
                 <span className="grid size-7 place-items-center rounded-full bg-fg text-sm font-semibold text-bg">{i + 1}</span>
@@ -83,7 +83,7 @@ export default async function HomePage() {
       </section>
 
       {/* 6. Final call */}
-      <section className="ring-sol mt-4 flex flex-col items-center rounded-3xl bg-panel/70 px-6 py-16 text-center">
+      <section className="flex flex-col items-center border-t border-line pt-20 text-center">
         <h2 className="text-3xl font-semibold tracking-[-0.02em] text-balance">{t.home.finalTitle}</h2>
         <LinkButton href="/new" variant="primary" className="mt-8 h-12 px-6 text-base">
           {t.home.ctaPrimary}
@@ -115,10 +115,10 @@ function CertificatePreview({ t }: { t: Messages }) {
         <Row k={t.cert.risk} v={`31 / 100 · ${t.cert.levels.moderate}`} />
         <Row k={t.cert.issuedBy} v="Acme Legal" />
       </dl>
-      <div className="mt-7 flex h-11 items-center justify-center gap-2 rounded-lg bg-fg text-sm font-medium text-bg">
-        <Icon name="link" />
-        {t.cert.share}
-      </div>
+      <p className="mt-6 flex items-center gap-2 border-t border-line pt-5 font-mono text-xs text-muted">
+        <Icon name="link" className="size-3.5" />
+        …/proof/7Hk2xQ
+      </p>
     </div>
   );
 }

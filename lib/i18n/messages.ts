@@ -6,7 +6,7 @@ export const LOCALE_NAMES: Record<Locale, string> = { en: "English", ru: "Рус
 export const DEFAULT_LOCALE: Locale = "en";
 
 const en = {
-  nav: { check: "Check", journal: "Journal", cta: "Get a certificate", language: "Language" },
+  nav: { check: "Check", journal: "Journal", cta: "Get a certificate", language: "Language", menu: "Menu" },
   home: {
     title: "Prove your AI's answer wasn't faked",
     lead: "ProofAPI puts a digital seal on AI results. Anyone can check it with a link, with no sign-up and no crypto.",
@@ -153,7 +153,7 @@ const en = {
 export type Messages = typeof en;
 
 const ru: Messages = {
-  nav: { check: "Проверить", journal: "Журнал", cta: "Получить сертификат", language: "Язык" },
+  nav: { check: "Проверить", journal: "Журнал", cta: "Получить сертификат", language: "Язык", menu: "Меню" },
   home: {
     title: "Докажите, что ответ ИИ не подделан",
     lead: "ProofAPI ставит цифровую печать на результат работы ИИ. Любой может проверить её по ссылке, без регистрации и без криптовалюты.",
@@ -298,7 +298,7 @@ const ru: Messages = {
 };
 
 const kk: Messages = {
-  nav: { check: "Тексеру", journal: "Журнал", cta: "Сертификат алу", language: "Тіл" },
+  nav: { check: "Тексеру", journal: "Журнал", cta: "Сертификат алу", language: "Тіл", menu: "Мәзір" },
   home: {
     title: "ЖИ жауабы жалған емес екенін дәлелдеңіз",
     lead: "ProofAPI ЖИ нәтижесіне цифрлық мөр басады. Кез келген адам оны сілтеме арқылы тексере алады: тіркелусіз және криптовалютасыз.",

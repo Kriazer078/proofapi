@@ -18,7 +18,8 @@ async function call<T>(url: string, method = "GET"): Promise<T> {
   return json as T;
 }
 
-export function ProofView({ initial, liveChain, issuerName }: { initial: PublicProof; liveChain: boolean; issuerName: string }) {
+/** `demo` shows the tampering controls used in presentations; people opening a shared link never see them. */
+export function ProofView({ initial, liveChain, issuerName, demo }: { initial: PublicProof; liveChain: boolean; issuerName: string; demo: boolean }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const [proof, setProof] = useState(initial);
@@ -63,7 +64,7 @@ export function ProofView({ initial, liveChain, issuerName }: { initial: PublicP
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(`${window.location.origin}/proof/${proof.id}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
@@ -195,7 +196,7 @@ export function ProofView({ initial, liveChain, issuerName }: { initial: PublicP
       </div>
 
       {/* Demo attacks, for presentations */}
-      {proof.mode === "full" && proof.status === "ANCHORED" && (
+      {demo && proof.mode === "full" && proof.status === "ANCHORED" && (
         <section className="mt-6 rounded-2xl border border-dashed border-line-strong p-6">
           <div className="flex flex-wrap items-center justify-between gap-5">
             <div>

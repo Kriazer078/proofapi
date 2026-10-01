@@ -36,7 +36,7 @@ export default function NewProofPage() {
       const res = await fetch("/api/proofs", { method: "POST", body });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? t.errors.generic);
-      router.push(`/proof/${json.proof.id}`);
+      router.push(`/proof/${json.proof.id}?demo`);
     } catch (e) {
       setPhase({ kind: "error", message: e instanceof Error ? e.message : t.errors.generic });
     }
@@ -98,7 +98,6 @@ export default function NewProofPage() {
               {phase.message}
             </p>
           )}
-          <p className="mt-12 text-center text-xs text-faint">{t.create.note}</p>
         </>
       ) : (
         <Panel className="mt-10 p-7" aria-live="polite">

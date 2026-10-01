@@ -13,7 +13,6 @@ const TONE: Record<AuditStatus, "ok" | "bad" | "neutral"> = {
   DATA_MODIFIED: "bad",
   CHAIN_BROKEN: "bad",
 };
-const DOT = { ok: "bg-ok", bad: "bg-bad", neutral: "bg-faint" };
 const PILL = { ok: "text-ok bg-ok/10 border-ok/25", bad: "text-bad bg-bad/10 border-bad/25", neutral: "text-muted bg-white/[0.04] border-line-strong" };
 
 export default async function JournalPage() {
@@ -50,7 +49,6 @@ export default async function JournalPage() {
             const title = e.fileName ?? (e.status === "HASH_ONLY" ? s.label : t.journal.unknown);
             const body = (
               <>
-                <span className={`size-2.5 shrink-0 rounded-full ${DOT[tone]}`} aria-hidden="true" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span className="truncate font-medium">{title}</span>
