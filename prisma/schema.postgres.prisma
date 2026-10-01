@@ -1,10 +1,13 @@
+// Same models as schema.prisma, for the hosted Postgres (Neon) used on Vercel. tests/prisma-schemas.test.ts keeps them in sync.
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Neon on Vercel: pooled URL for queries, direct URL for schema changes.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 model Proof {

@@ -14,7 +14,8 @@
     "register-issuer": "tsx scripts/register-issuer.ts",
     "issuer:active": "tsx scripts/set-active.ts",
     "chain:status": "tsx scripts/chain-status.ts",
-    "e2e:devnet": "tsx scripts/e2e-devnet.ts"
+    "e2e:devnet": "tsx scripts/e2e-devnet.ts",
+    "vercel-build": "prisma generate --schema prisma/schema.postgres.prisma && prisma db push --schema prisma/schema.postgres.prisma --skip-generate && next build"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

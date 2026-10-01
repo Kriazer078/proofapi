@@ -24,3 +24,23 @@ export class ChainError extends Error {
     this.name = "ChainError";
   }
 }
+
+/** The caller may not do this to this resource. Maps to HTTP 403. */
+export class ForbiddenError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}
+
+/** Too many requests in the current window. Maps to HTTP 429. */
+export class RateLimitError extends Error {
+  readonly code = "rate_limited";
+  constructor(message = "Too many certificates from this address. Please try again in an hour.") {
+    super(message);
+    this.name = "RateLimitError";
+  }
+}

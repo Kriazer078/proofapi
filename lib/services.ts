@@ -1,3 +1,4 @@
+import { PrismaAccessStore } from "./access";
 import { MockAIProvider } from "./ai-provider";
 import { prisma } from "./db";
 import { createProofService } from "./proof-service";
@@ -8,5 +9,5 @@ export function getServices() {
   const repo = new PrismaProofRepo(prisma);
   const chain = getChainClient();
   const proofs = createProofService({ repo, chain, ai: new MockAIProvider() });
-  return { repo, chain, proofs, deps: { repo, chain } };
+  return { repo, chain, proofs, access: new PrismaAccessStore(prisma), deps: { repo, chain } };
 }

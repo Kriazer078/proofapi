@@ -32,21 +32,28 @@ function pubkey(env: Env, name: string): PublicKey {
 }
 
 export function loadAnchorConfig(env: Env, read: ReadFile = (p) => readFileSync(p, "utf8")): AnchorConfig {
-  const required = ["PROGRAM_ID", "AUTHORITY_PUBKEY", "WRITER_KEYPAIR_PATH"];
-  const missing = required.filter((k) => !env[k]);
+  const missing = ["PROGRAM_ID", "AUTHORITY_PUBKEY"].filter((k) => !env[k]);
+  if (!env.WRITER_SECRET_KEY && !env.WRITER_KEYPAIR_PATH) missing.push("WRITER_SECRET_KEY or WRITER_KEYPAIR_PATH");
   if (missing.length) throw new Error(`CHAIN_MODE=anchor needs ${missing.join(", ")} in .env. Run npm run setup and see programs/proof_registry/README.md.`);
-  const path = env.WRITER_KEYPAIR_PATH!;
+  // Hosted deployments keep the key in a secret environment variable; local setups use the file from npm run setup.
   let text: string;
-  try {
-    text = read(path);
-  } catch {
-    throw new Error(`Cannot read keypair ${path}. Run npm run setup.`);
+  let label: string;
+  if (env.WRITER_SECRET_KEY) {
+    text = env.WRITER_SECRET_KEY;
+    label = "WRITER_SECRET_KEY";
+  } else {
+    label = env.WRITER_KEYPAIR_PATH!;
+    try {
+      text = read(label);
+    } catch {
+      throw new Error(`Cannot read keypair ${label}. Run npm run setup.`);
+    }
   }
   return {
     rpcUrl: env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
     cluster: env.SOLANA_CLUSTER || "devnet",
     programId: pubkey(env, "PROGRAM_ID"),
     authority: pubkey(env, "AUTHORITY_PUBKEY"),
-    writer: keypairFromJson(text, path),
+    writer: keypairFromJson(text, label),
   };
 }

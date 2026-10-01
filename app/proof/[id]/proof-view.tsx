@@ -11,10 +11,19 @@ import { ISSUE_NAMES, formatDate } from "@/lib/i18n/messages";
 import type { PublicProof } from "@/lib/public-proof";
 import type { VerificationResult } from "@/lib/verifier";
 
+class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+  }
+}
+
 async function call<T>(url: string, method = "GET"): Promise<T> {
   const res = await fetch(url, { method });
   const json = await res.json();
-  if (!res.ok) throw new Error(json.error ?? "Request failed");
+  if (!res.ok) throw new ApiError(json.error ?? "Request failed", json.code);
   return json as T;
 }
 
@@ -56,7 +65,7 @@ export function ProofView({ initial, liveChain, issuerName, demo }: { initial: P
       setProof((await call<{ proof: PublicProof }>(`/api/proofs/${proof.id}/${name}`, "POST")).proof);
       await verify();
     } catch (e) {
-      setError(e instanceof Error ? e.message : t.errors.generic);
+      setError(e instanceof ApiError && e.code && t.errors.codes[e.code] ? t.errors.codes[e.code] : t.errors.generic);
     } finally {
       setBusy(null);
     }

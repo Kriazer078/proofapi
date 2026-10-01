@@ -15,6 +15,14 @@ const base = {
 };
 
 describe("loadAnchorConfig", () => {
+  it("takes the writer key from WRITER_SECRET_KEY when hosted without key files", () => {
+    const { WRITER_KEYPAIR_PATH: _path, ...rest } = base;
+    const cfg = loadAnchorConfig({ ...rest, WRITER_SECRET_KEY: files[".keys/writer.json"] }, () => {
+      throw new Error("must not read files");
+    });
+    expect(cfg.writer.publicKey.equals(writer.publicKey)).toBe(true);
+  });
+
   it("loads a complete config with devnet defaults", () => {
     const cfg = loadAnchorConfig(base, read);
     expect(cfg.rpcUrl).toBe("https://api.devnet.solana.com");
@@ -26,7 +34,7 @@ describe("loadAnchorConfig", () => {
 
   it("names every missing variable", () => {
     expect(() => loadAnchorConfig({ PROGRAM_ID: "" }, read)).toThrow(
-      "CHAIN_MODE=anchor needs PROGRAM_ID, AUTHORITY_PUBKEY, WRITER_KEYPAIR_PATH in .env",
+      "CHAIN_MODE=anchor needs PROGRAM_ID, AUTHORITY_PUBKEY, WRITER_SECRET_KEY or WRITER_KEYPAIR_PATH in .env",
     );
   });
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { type AuditStatus, auditHistory } from "@/lib/history-audit";
 import { formatDate } from "@/lib/i18n/messages";
 import { getMessages } from "@/lib/i18n/server";
+import { currentOwnerHash } from "@/lib/request-access";
 import { getServices } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,11 @@ const PILL = { ok: "text-ok bg-ok/10 border-ok/25", bad: "text-bad bg-bad/10 bor
 
 export default async function JournalPage() {
   const { t, locale } = await getMessages();
-  const audit = await auditHistory(getServices().deps);
+  const { deps, access } = getServices();
+  const audit = await auditHistory(deps);
+  // Anyone sees that records exist and whether they are intact; names and links only for your own certificates.
+  const owner = await currentOwnerHash();
+  const mine = new Set(owner ? await access.ownedIds(owner) : []);
   const entries = [...audit.entries].reverse();
 
   return (
@@ -46,7 +51,8 @@ export default async function JournalPage() {
           {entries.map((e) => {
             const tone = TONE[e.status];
             const s = t.journal.status[e.status];
-            const title = e.fileName ?? (e.status === "HASH_ONLY" ? t.cert.hashOnly : t.journal.unknown);
+            const own = e.dbId !== null && mine.has(e.dbId);
+            const title = !own && e.dbId ? t.journal.hidden : (e.fileName ?? (e.status === "HASH_ONLY" ? t.cert.hashOnly : t.journal.unknown));
             const body = (
               <>
                 <div className="min-w-0 flex-1">
@@ -59,12 +65,12 @@ export default async function JournalPage() {
                     {s.note && <span className={tone === "bad" ? "text-bad/90" : ""}> · {s.note}</span>}
                   </div>
                 </div>
-                {e.dbId && <span className="hidden text-sm text-muted sm:inline">{t.journal.open} →</span>}
+                {own && <span className="hidden text-sm text-muted sm:inline">{t.journal.open} →</span>}
               </>
             );
             return (
               <li key={e.sequence}>
-                {e.dbId ? (
+                {own ? (
                   <Link href={`/proof/${e.dbId}`} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-white/[0.03]">
                     {body}
                   </Link>
