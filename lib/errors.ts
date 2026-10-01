@@ -44,3 +44,12 @@ export class RateLimitError extends Error {
     this.name = "RateLimitError";
   }
 }
+
+/** The AI provider could not answer (quota, outage, malformed reply). Maps to HTTP 503. */
+export class AIUnavailableError extends Error {
+  readonly code = "ai_unavailable";
+  constructor(message = "The AI service is busy right now. Please try again in a minute.") {
+    super(message);
+    this.name = "AIUnavailableError";
+  }
+}

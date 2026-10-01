@@ -21,6 +21,9 @@ const RULES: { pattern: RegExp; issue: string; weight: number }[] = [
   { pattern: /auto(matic)?(ally)?[- ]?renew|автопролонг|автоматическ[а-я]* продлен|автоматты ұзарт/i, issue: "Automatic renewal", weight: 9 },
 ];
 
+/** Risk categories the interface knows how to name in every language. */
+export const KNOWN_ISSUES = RULES.map((rule) => rule.issue);
+
 /** Deterministic keyword-based stand-in for a real model. Real providers plug in behind AIProvider later. */
 export class MockAIProvider implements AIProvider {
   readonly name = "mock";

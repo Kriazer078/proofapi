@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getChainMode } from "@/lib/config";
+import { getAIProviderName, getChainMode } from "@/lib/config";
 import { CONTACT_URL, GITHUB_URL } from "@/lib/i18n/marketing";
 import { getMessages } from "@/lib/i18n/server";
 import { Logo } from "./logo";
@@ -78,7 +78,7 @@ export async function SiteFooter() {
             ) : (
               <span className="text-warn">{t.cert.simulation}</span>
             )}
-            <span>{t.footer.demo}</span>
+            <span>{getAIProviderName() === "gemini" ? t.footer.gemini : t.footer.demo}</span>
           </span>
         </div>
       </div>

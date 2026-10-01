@@ -32,7 +32,7 @@ const en = {
     faqTitle: "Questions",
     faq: [
       { q: "Do I need a crypto wallet?", a: "No. Just open the site." },
-      { q: "Can anyone see my document?", a: "No. We keep only the seal, a short code calculated from the document. The document can't be rebuilt from it." },
+      { q: "Can anyone see my document?", a: "Other users can't. Only the seal goes to the blockchain, and the document can't be rebuilt from it. To review the text, the AI provider (Google Gemini) processes it." },
       { q: "Where is the seal kept?", a: "In the public Solana blockchain. Once written, it can't be changed or deleted, even by ProofAPI." },
       { q: "Does it prove the AI is right?", a: "No. It proves the answer hasn't changed since it was sealed." },
       { q: "How much does it cost?", a: "It's free during the beta." },
@@ -66,6 +66,7 @@ const en = {
     wait: "a few seconds…",
     tooBig: (name: string, size: string) => `${name} is ${size}. The limit is 4 MB.`,
     note: "The AI in this demo is simulated. The seal is real.",
+    noteGemini: "The text is sent to Google Gemini for review. During the beta, don't upload confidential documents.",
   },
   cert: {
     back: "All certificates",
@@ -156,7 +157,7 @@ const en = {
     expertText: "Check an evidence file straight in the blockchain, without our server.",
     expertButton: "Open the independent checker",
   },
-  footer: { chain: "Seals are stored in the Solana blockchain.", demo: "The AI in this demo is simulated." },
+  footer: { chain: "Seals are stored in the Solana blockchain.", demo: "The AI in this demo is simulated.", gemini: "AI review by Google Gemini." },
   errors: {
     generic: "Something went wrong. Please try again.",
     codes: {
@@ -168,6 +169,7 @@ const en = {
       bad_request: "Something went wrong with the upload. Please try again.",
       rate_limited: "You've made many certificates in the last hour. Please try again later.",
       not_owner: "Only the person who created this certificate can do this.",
+      ai_unavailable: "The AI is busy right now. Please try again in a minute.",
     } as Record<string, string>,
   },
 };
@@ -200,7 +202,7 @@ const ru: BaseMessages = {
     faqTitle: "Частые вопросы",
     faq: [
       { q: "Нужен ли криптокошелёк?", a: "Нет. Просто откройте сайт." },
-      { q: "Видит ли кто-то мой документ?", a: "Нет. Хранится только печать: короткий код, вычисленный из документа. Восстановить документ по нему нельзя." },
+      { q: "Видит ли кто-то мой документ?", a: "Другие пользователи — нет. В блокчейн попадает только печать, восстановить по ней документ нельзя. Для проверки текст обрабатывает ИИ-провайдер (Google Gemini)." },
       { q: "Где хранится печать?", a: "В публичном блокчейне Solana. После записи её нельзя изменить или удалить, даже нам." },
       { q: "Доказывает ли это, что ИИ прав?", a: "Нет. Это доказывает, что ответ не меняли после того, как поставили печать." },
       { q: "Сколько это стоит?", a: "Бесплатно на время бета-версии." },
@@ -234,6 +236,7 @@ const ru: BaseMessages = {
     wait: "несколько секунд…",
     tooBig: (name, size) => `Файл ${name} весит ${size}. Максимум 4 МБ.`,
     note: "ИИ в демо-версии имитирован. Печать настоящая.",
+    noteGemini: "Текст отправляется в Google Gemini для проверки. Во время беты не загружайте конфиденциальные документы.",
   },
   cert: {
     back: "Все сертификаты",
@@ -324,7 +327,7 @@ const ru: BaseMessages = {
     expertText: "Проверьте файл-доказательство напрямую в блокчейне, без нашего сервера.",
     expertButton: "Открыть независимую проверку",
   },
-  footer: { chain: "Печати хранятся в блокчейне Solana.", demo: "ИИ в демо-версии имитирован." },
+  footer: { chain: "Печати хранятся в блокчейне Solana.", demo: "ИИ в демо-версии имитирован.", gemini: "Проверку делает ИИ Google Gemini." },
   errors: {
     generic: "Что-то пошло не так. Попробуйте ещё раз.",
     codes: {
@@ -336,6 +339,7 @@ const ru: BaseMessages = {
       bad_request: "Не получилось загрузить файл. Попробуйте ещё раз.",
       rate_limited: "Слишком много сертификатов за последний час. Попробуйте позже.",
       not_owner: "Это может сделать только тот, кто создал сертификат.",
+      ai_unavailable: "ИИ сейчас перегружен. Попробуйте через минуту.",
     },
   },
 };
@@ -365,7 +369,7 @@ const kk: BaseMessages = {
     faqTitle: "Жиі қойылатын сұрақтар",
     faq: [
       { q: "Крипто әмиян керек пе?", a: "Жоқ. Сайтты ашсаңыз болғаны." },
-      { q: "Құжатымды біреу көре ме?", a: "Жоқ. Тек мөр сақталады: құжаттан есептелген қысқа код. Одан құжатты қалпына келтіру мүмкін емес." },
+      { q: "Құжатымды біреу көре ме?", a: "Басқа пайдаланушылар көрмейді. Блокчейнге тек мөр түседі, одан құжатты қалпына келтіру мүмкін емес. Тексеру үшін мәтінді ЖИ провайдері (Google Gemini) өңдейді." },
       { q: "Мөр қайда сақталады?", a: "Solana ашық блокчейнінде. Жазылғаннан кейін оны өзгерту немесе жою мүмкін емес, тіпті бізге де." },
       { q: "Бұл ЖИ-дің дұрыс екенін дәлелдей ме?", a: "Жоқ. Бұл мөр басылғаннан кейін жауаптың өзгермегенін дәлелдейді." },
       { q: "Бағасы қанша?", a: "Бета кезінде тегін." },
@@ -399,6 +403,7 @@ const kk: BaseMessages = {
     wait: "бірнеше секунд…",
     tooBig: (name, size) => `${name} файлының көлемі ${size}. Ең көбі 4 МБ.`,
     note: "Демо нұсқада ЖИ имитацияланған. Мөр шынайы.",
+    noteGemini: "Мәтін тексеру үшін Google Gemini-ге жіберіледі. Бета кезінде құпия құжаттарды жүктемеңіз.",
   },
   cert: {
     back: "Барлық сертификаттар",
@@ -489,7 +494,7 @@ const kk: BaseMessages = {
     expertText: "Дәлел файлын біздің серверсіз, тікелей блокчейнде тексеріңіз.",
     expertButton: "Тәуелсіз тексеруді ашу",
   },
-  footer: { chain: "Мөрлер Solana блокчейнінде сақталады.", demo: "Демо нұсқада ЖИ имитацияланған." },
+  footer: { chain: "Мөрлер Solana блокчейнінде сақталады.", demo: "Демо нұсқада ЖИ имитацияланған.", gemini: "Тексеруді Google Gemini ЖИ жасайды." },
   errors: {
     generic: "Бірдеңе дұрыс болмады. Қайталап көріңіз.",
     codes: {
@@ -501,6 +506,7 @@ const kk: BaseMessages = {
       bad_request: "Файлды жүктеу мүмкін болмады. Қайталап көріңіз.",
       rate_limited: "Соңғы бір сағатта тым көп сертификат жасалды. Кейінірек қайталаңыз.",
       not_owner: "Мұны тек сертификатты жасаған адам ғана істей алады.",
+      ai_unavailable: "ЖИ қазір бос емес. Бір минуттан кейін қайталаңыз.",
     },
   },
 };

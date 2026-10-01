@@ -1,13 +1,22 @@
 import { PrismaAccessStore } from "./access";
-import { MockAIProvider } from "./ai-provider";
+import type { AIProvider } from "./ai-provider";
+import { createAIProvider } from "./ai-gemini";
 import { prisma } from "./db";
 import { createProofService } from "./proof-service";
 import { PrismaProofRepo } from "./proof-repo-prisma";
 import { getChainClient } from "./solana";
 
+const g = globalThis as { __proofapiAI?: AIProvider };
+
+/** One AI provider per server process, so its small answer cache survives between requests. */
+export function getAI(): AIProvider {
+  g.__proofapiAI ??= createAIProvider(process.env);
+  return g.__proofapiAI;
+}
+
 export function getServices() {
   const repo = new PrismaProofRepo(prisma);
   const chain = getChainClient();
-  const proofs = createProofService({ repo, chain, ai: new MockAIProvider() });
+  const proofs = createProofService({ repo, chain, ai: getAI() });
   return { repo, chain, proofs, access: new PrismaAccessStore(prisma), deps: { repo, chain } };
 }

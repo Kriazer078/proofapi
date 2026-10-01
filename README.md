@@ -86,8 +86,8 @@ Clients' contracts can't be published on a blockchain.
 | Web app and API | Next.js 15 (App Router), React 19, Tailwind CSS 4 |
 | Database | Prisma 6, SQLite locally, Postgres (Neon) when hosted |
 | Independent verifier | Single HTML file, WebCrypto, Solana JSON-RPC |
-| Testing | Vitest (111 tests), byte-level fake of the program, devnet end-to-end script |
-| AI | Deterministic mock for the demo; real providers plug in behind one interface |
+| Testing | Vitest (118 tests), byte-level fake of the program, devnet end-to-end script |
+| AI | Google Gemini (`gemini-3.5-flash-lite`, structured JSON output, 30k-character cap, answer cache) when `GEMINI_API_KEY` is set; deterministic mock otherwise |
 
 ---
 
@@ -155,7 +155,7 @@ npm run e2e:devnet       # create, verify, tamper, audit, and write an evidence 
 ## Roadmap
 
 - **Now (MVP):** own Solana program, certificates, history audit, independent verifier, three languages
-- **Next:** real AI providers with prompt caching; TypeScript and Python SDK with client-side hashing
+- **Next:** more AI providers (OpenAI, Anthropic) behind the same interface; API keys; TypeScript and Python SDK with client-side hashing
 - **Then:** batching many proofs into one account (Merkle root) to cut cost; zkTLS proof that an output came from the AI provider's API
 - **Later:** qualified eIDAS timestamps on top of the record hash; mainnet deployment after a security review
 
