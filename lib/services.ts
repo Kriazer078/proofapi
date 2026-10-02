@@ -2,6 +2,7 @@ import { PrismaAccessStore } from "./access";
 import { type AccountStore, PrismaAccountStore } from "./accounts";
 import type { AIProvider } from "./ai-provider";
 import { createAIProvider } from "./ai-gemini";
+import { type DemoRequestStore, PrismaDemoRequestStore } from "./demo-requests";
 import { prisma } from "./db";
 import { createProofService } from "./proof-service";
 import { PrismaProofRepo } from "./proof-repo-prisma";
@@ -18,6 +19,11 @@ export function getAI(): AIProvider {
 /** Users and API keys. */
 export function getAccounts(): AccountStore {
   return new PrismaAccountStore(prisma);
+}
+
+/** Demo requests sent from the website form. */
+export function getDemoRequests(): DemoRequestStore {
+  return new PrismaDemoRequestStore(prisma);
 }
 
 export function getServices() {

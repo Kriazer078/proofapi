@@ -5,7 +5,9 @@ import { signOut } from "next-auth/react";
 import { useI18n } from "@/components/i18n";
 import { DEV } from "@/lib/i18n/developer";
 import { Button } from "@/components/ui/button";
-export function ConsoleNav({ name }: { name: string }) {
+
+const REQUESTS = { en: "Demo requests", ru: "Заявки на демо", kk: "Демо өтінімдері" } as const;
+export function ConsoleNav({ name, admin = false }: { name: string; admin?: boolean }) {
   const { locale } = useI18n();
   const d = DEV[locale];
   const path = usePathname();
@@ -17,6 +19,7 @@ export function ConsoleNav({ name }: { name: string }) {
     ["/console/usage", d.usage],
     ["/developers", d.docs],
   ];
+  if (admin) links.splice(5, 0, ["/console/requests", REQUESTS[locale]]);
   return (
     <aside className="min-w-0 lg:sticky lg:top-20">
       <p className="mb-3 truncate text-sm font-medium">{name}</p>

@@ -64,6 +64,7 @@ const en = {
   legal: {
     privacyTitle: "Privacy",
     privacy: [
+      "If you book a demo, we keep your name, email, company and message only to reply to you, and delete them on request.",
       "We store the file you upload, the AI result and a random salt in our database, so the certificate can be shown and re-checked.",
       "Only salted SHA-256 fingerprints go to the Solana blockchain. They are public, but the document can't be rebuilt from them.",
       "We keep a random token in a cookie so only your browser can use the demo controls on certificates you created.",
@@ -143,6 +144,7 @@ const ru: Marketing = {
   legal: {
     privacyTitle: "Конфиденциальность",
     privacy: [
+      "Если вы записываетесь на демо, мы храним имя, почту, компанию и сообщение только чтобы ответить вам и удалим их по запросу.",
       "Мы храним загруженный файл, ответ ИИ и случайную соль в нашей базе, чтобы показывать и перепроверять сертификат.",
       "В блокчейн Solana попадают только солёные SHA-256 отпечатки. Они публичны, но восстановить по ним документ нельзя.",
       "Мы храним случайный токен в cookie, чтобы демо-кнопки работали только в браузере, который создал сертификат.",
@@ -220,6 +222,7 @@ const kk: Marketing = {
   legal: {
     privacyTitle: "Құпиялылық",
     privacy: [
+      "Демоға жазылсаңыз, атыңызды, поштаңызды, компанияңызды және хабарламаңызды тек жауап беру үшін сақтаймыз және сұрау бойынша жоямыз.",
       "Сертификатты көрсету және қайта тексеру үшін жүктелген файлды, ЖИ жауабын және кездейсоқ тұзды дерекқорымызда сақтаймыз.",
       "Solana блокчейніне тек тұздалған SHA-256 іздері түседі. Олар ашық, бірақ олардан құжатты қалпына келтіру мүмкін емес.",
       "Демо батырмалары тек сертификатты жасаған браузерде жұмыс істеуі үшін cookie ішінде кездейсоқ токен сақтаймыз.",

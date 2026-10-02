@@ -78,3 +78,18 @@ model ApiKey {
 
   @@index([userId])
 }
+
+/// A request for a product demo sent from the website form.
+model DemoRequest {
+  id        String   @id
+  name      String
+  email     String
+  company   String?
+  message   String?
+  locale    String
+  ipHash    String
+  createdAt DateTime
+
+  @@index([createdAt])
+  @@index([ipHash, createdAt])
+}

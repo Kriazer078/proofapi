@@ -3,13 +3,13 @@ import type React from "react";
 import { Check } from "lucide-react";
 import { DEV } from "@/lib/i18n/developer";
 import { Icon, LinkButton } from "@/components/primitives";
-import { CONTACT_URL } from "@/lib/i18n/marketing";
 import { getMessages } from "@/lib/i18n/server";
 import { UX } from "@/lib/i18n/ux";
 import { HERO } from "@/lib/i18n/hero";
 import { HeroShot } from "@/components/site/hero-shot";
 import { LiveChain } from "@/components/site/live-chain";
 import { TamperPreview } from "@/components/site/tamper-preview";
+import { DemoDialog } from "@/components/site/demo-dialog";
 
 export default async function HomePage() {
   const { t, locale } = await getMessages();
@@ -52,13 +52,10 @@ export default async function HomePage() {
             </LinkButton>
           </span>
           <span className="hero-cta" style={{ "--i": 1 } as React.CSSProperties}>
-            <LinkButton
-              href={CONTACT_URL}
-              external
+            <DemoDialog
+              label={h.demo}
               className="h-11 rounded-full px-5 text-[15px]"
-            >
-              {h.demo}
-            </LinkButton>
+            />
           </span>
         </div>
         <HeroShot copy={h.shot} />
@@ -169,13 +166,13 @@ export default async function HomePage() {
                   </li>
                 ))}
               </ul>
-              <LinkButton
-                href={i === 2 ? CONTACT_URL : "/console/keys"}
-                external={i === 2}
-                className="mt-8 w-full"
-              >
-                {i === 2 ? u.contact : d.start}
-              </LinkButton>
+              {i === 2 ? (
+                <DemoDialog label={h.demo} className="mt-8 w-full" />
+              ) : (
+                <LinkButton href="/console/keys" className="mt-8 w-full">
+                  {d.start}
+                </LinkButton>
+              )}
             </div>
           ))}
         </div>
@@ -198,10 +195,7 @@ export default async function HomePage() {
           <h2 className="section-title">{t.mk.contact.title}</h2>
           <p className="page-intro">{t.mk.contact.text}</p>
         </div>
-        <LinkButton href={CONTACT_URL} external>
-          {u.contact}
-          <Icon name="external" />
-        </LinkButton>
+        <DemoDialog label={h.demo} className="rounded-full px-5" />
       </section>
     </>
   );
