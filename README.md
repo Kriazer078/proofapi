@@ -8,7 +8,7 @@
 
 > ProofAPI puts a digital seal on every AI answer. The input, the answer and the settings are fingerprinted and recorded by our own Solana program. Anyone with the link can check that nothing was changed — no account, no crypto wallet.
 
-[Live Demo](https://proofapi.vercel.app) · [Video Demo](https://youtu.be/28qNhRNTmOw) · [Presentation](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [X](https://x.com/ProofAPI)
+[Live Demo](https://proofapi.vercel.app) · [Video Demo](https://youtu.be/28qNhRNTmOw) · [Video Pitch](https://youtu.be/wEYngaGRzXQ) · [Presentation](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [X](https://x.com/ProofAPI)
 
 ---
 
@@ -214,7 +214,7 @@ npm run e2e:devnet       # create, verify, tamper, audit, and write an evidence 
 - [Program on Solana Explorer (devnet)](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
 - [Project Presentation](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing)
 - [Video Demo](https://youtu.be/28qNhRNTmOw)
-- Video Pitch — _coming soon_
+- [Video Pitch](https://youtu.be/wEYngaGRzXQ)
 
 ---
 
