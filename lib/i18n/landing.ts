@@ -56,7 +56,7 @@ const en = {
     title: "Three steps. One request.",
     steps: [
       { title: "Your AI makes a decision", text: "As usual, inside your product. Send the input and the answer to ProofAPI." },
-      { title: "We put a seal on it", text: "Fingerprints are written to Solana with a number and a time. The data stays with you." },
+      { title: "We put a seal on it", text: "Fingerprints are written to Solana with a number and a time. In fingerprints-only mode, the content stays with you." },
       { title: "Anyone checks it by link", text: "A client, auditor or court sees that the decision hasn't changed since it was sealed." },
     ],
     sample: { input: "input: claim 48213", output: "answer: denied", model: "model: gemini" },
@@ -188,7 +188,7 @@ const ru: Landing = {
     title: "Три шага. Один запрос.",
     steps: [
       { title: "Ваш ИИ принимает решение", text: "Как обычно, в вашем продукте. Отправьте вход и ответ в ProofAPI." },
-      { title: "Мы ставим печать", text: "Отпечатки записываются в Solana с номером и временем. Сами данные остаются у вас." },
+      { title: "Мы ставим печать", text: "Отпечатки записываются в Solana с номером и временем. В режиме «только отпечатки» содержимое остаётся у вас." },
       { title: "Любой проверяет по ссылке", text: "Клиент, аудитор или суд видят: решение не меняли с момента печати." },
     ],
     sample: { input: "вход: заявка 48213", output: "ответ: отказ", model: "модель: gemini" },
@@ -318,7 +318,7 @@ const kk: Landing = {
     title: "Үш қадам. Бір сұрау.",
     steps: [
       { title: "ЖИ-іңіз шешім қабылдайды", text: "Әдеттегідей, өз өніміңізде. Кіріс пен жауапты ProofAPI-ға жіберіңіз." },
-      { title: "Біз мөр басамыз", text: "Іздер Solana-ға нөмір мен уақытпен жазылады. Деректердің өзі сізде қалады." },
+      { title: "Біз мөр басамыз", text: "Іздер Solana-ға нөмір мен уақытпен жазылады. Тек іздер режимінде мазмұн сізде қалады." },
       { title: "Кез келген адам сілтеме арқылы тексереді", text: "Клиент, аудитор немесе сот шешімнің мөрден кейін өзгермегенін көреді." },
     ],
     sample: { input: "кіріс: өтінім 48213", output: "жауап: бас тарту", model: "модель: gemini" },

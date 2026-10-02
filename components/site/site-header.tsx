@@ -1,77 +1,147 @@
 "use client";
-
-import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Menu, X, ArrowUpRight } from "lucide-react";
+import { useRef, useState } from "react";
 import { LanguageSwitcher, useI18n } from "@/components/i18n";
 import { Logo } from "@/components/logo";
-import { buttonVariants } from "@/components/ui/button";
-import { CONTACT_URL } from "@/lib/i18n/marketing";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { DEV } from "@/lib/i18n/developer";
+import { HERO } from "@/lib/i18n/hero";
+import { UX } from "@/lib/i18n/ux";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
-  const { t } = useI18n();
-  const n = t.lp.nav;
+  const { t, locale } = useI18n();
+  const u = UX[locale];
+  const d = DEV[locale];
+  const h = HERO[locale];
   const path = usePathname();
-  const [open, setOpen] = useState(false);
-  useEffect(() => setOpen(false), [path]);
-
+  const publicProof = path.startsWith("/proof/");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  function dismissMenu() {
+    setMenuOpen(false);
+    menuButton.current?.focus();
+  }
   const links = [
-    { href: "/#how", label: n.how },
-    { href: "/#cases", label: n.cases },
-    { href: "/developers", label: n.developers },
-    { href: "/#pricing", label: n.pricing },
+    { href: "/developers", label: d.docs },
+    { href: "/playground", label: d.playground },
+    { href: "/#pricing", label: t.mk.nav.pricing },
+    { href: "/console", label: d.console },
   ];
-
   return (
-    <header className="sticky top-[env(safe-area-inset-top,0px)] z-40 border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-[1180px] items-center justify-between gap-4 px-5 sm:px-8">
-        <Link href="/" className="flex items-center gap-2.5 text-[17px] font-semibold tracking-tight">
-          <Logo />
+    <header className="sticky top-0 z-40 border-b bg-background">
+      <a href="#main-content" className="skip-link">
+        {u.skip}
+      </a>
+      <div className="mx-auto flex h-14 max-w-[1180px] items-center gap-5 px-4 sm:px-6">
+        <Link
+          href="/"
+          className="inline-flex shrink-0 items-center gap-2 text-base font-semibold"
+        >
+          <Logo className="size-5" />
           ProofAPI
         </Link>
-        <nav aria-label="Main" className="hidden items-center gap-7 text-[15px] text-muted-foreground lg:flex">
+        <nav
+          aria-label={u.navigation}
+          className="hidden flex-1 items-center gap-1 lg:flex"
+        >
           {links.map((l) => (
-            <Link key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+            <Link
+              key={l.href}
+              href={l.href}
+              aria-current={path === l.href ? "page" : undefined}
+              className={cn(
+                "rounded-md px-3 py-2 text-sm transition-colors hover:bg-surface-muted hover:text-foreground",
+                path === l.href
+                  ? "bg-surface-muted font-medium text-foreground"
+                  : "text-text-secondary",
+              )}
+            >
               {l.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2">
           <LanguageSwitcher />
-          <a href={CONTACT_URL} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "md" }), "hidden bg-card md:inline-flex")}>
-            {n.demo}
-          </a>
-          <Link href="/console" className={cn(buttonVariants({ size: "md" }), "hidden sm:inline-flex")}>
-            {n.start}
-          </Link>
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls="site-menu"
-            aria-label="Menu"
-            className="grid size-9 place-items-center rounded-lg border border-border bg-card text-muted-foreground lg:hidden"
+          {!publicProof && (
+            <>
+              <Link
+                href="/signin"
+                className="hidden px-2 text-sm text-text-secondary transition-colors hover:text-foreground lg:inline"
+              >
+                {h.signIn}
+              </Link>
+              <Link
+                href="/console/keys"
+                data-slot="button"
+                aria-current={path === "/console/keys" ? "page" : undefined}
+                className={cn(
+                  buttonVariants(),
+                  "hidden rounded-full px-4 lg:inline-flex",
+                )}
+              >
+                {h.start}
+              </Link>
+            </>
+          )}
+          <Button
+            ref={menuButton}
+            variant="ghost"
+            size="icon-lg"
+            className="lg:hidden"
+            aria-label={t.nav.menu}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen(!menuOpen)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") dismissMenu();
+            }}
           >
-            {open ? <X className="size-4" /> : <Menu className="size-4" />}
-          </button>
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </Button>
         </div>
       </div>
-      {open && (
-        <nav id="site-menu" aria-label="Main" className="border-t border-border bg-background px-5 pt-2 pb-5 lg:hidden">
-          {links.map((l) => (
-            <Link key={l.href} href={l.href} className="block py-3 text-lg text-foreground">
-              {l.label}
-            </Link>
-          ))}
-          <div className="mt-3 grid gap-2">
-            <Link href="/console" className={cn(buttonVariants({ size: "xl" }), "w-full")}>
-              {n.start}
-            </Link>
-            <a href={CONTACT_URL} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full bg-card")}>
-              {n.demo}
-            </a>
+      {menuOpen && (
+        <nav
+          id="mobile-navigation"
+          aria-label={u.navigation}
+          className="border-t bg-surface px-4 py-3 lg:hidden"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") dismissMenu();
+          }}
+        >
+          <div className="mx-auto grid max-w-[1132px] gap-1">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                aria-current={path === link.href ? "page" : undefined}
+                className={cn(
+                  "flex min-h-11 items-center justify-between rounded-md px-3 text-sm hover:bg-surface-muted",
+                  path === link.href
+                    ? "bg-surface-muted font-medium text-foreground"
+                    : "text-text-secondary",
+                )}
+              >
+                {link.label}
+                <ArrowUpRight
+                  className="size-4 text-text-muted"
+                  aria-hidden="true"
+                />
+              </Link>
+            ))}
+            {!publicProof && (
+              <Link
+                href="/console/keys"
+                onClick={() => setMenuOpen(false)}
+                className={cn(buttonVariants(), "mt-2 min-h-11 w-full rounded-full")}
+              >
+                {h.start}
+              </Link>
+            )}
           </div>
         </nav>
       )}

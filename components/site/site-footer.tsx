@@ -18,36 +18,55 @@ export async function SiteFooter() {
     { href: "/terms", label: f.terms },
   ];
   return (
-    <footer className="mt-28 border-t border-border">
-      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-5 py-10 text-sm text-muted-foreground sm:px-8 md:flex-row md:items-center md:justify-between">
+    <footer className="mt-8 border-t border-border">
+      <div className="mx-auto flex max-w-[1180px] flex-col gap-6 px-4 py-6 text-sm text-muted-foreground sm:px-6 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2.5 text-foreground">
           <Logo className="size-5" />
           <span className="font-medium">ProofAPI</span>
-          <span className="text-faint">· {f.rights.replace("© 2026 ProofAPI · ", "")}</span>
+          <span className="text-faint">
+            · {f.rights.replace("© 2026 ProofAPI · ", "")}
+          </span>
         </div>
-        <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-3">
           {links.map((l) =>
             l.external ? (
-              <a key={l.href} href={l.href} target="_blank" rel="noreferrer" className="transition-colors hover:text-foreground">
+              <a
+                key={l.href}
+                href={l.href}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-foreground"
+              >
                 {l.label}
               </a>
             ) : (
-              <Link key={l.href} href={l.href} className="transition-colors hover:text-foreground">
+              <Link
+                key={l.href}
+                href={l.href}
+                className="transition-colors hover:text-foreground"
+              >
                 {l.label}
               </Link>
             ),
           )}
         </nav>
       </div>
-      <div className="mx-auto flex max-w-[1180px] flex-wrap gap-x-6 gap-y-1 px-5 pb-10 text-xs text-faint sm:px-8">
+      <div className="mx-auto flex max-w-[1180px] flex-wrap gap-x-6 gap-y-1 px-4 pb-6 text-[13px] text-faint sm:px-6">
         {live ? (
-          <a href={`https://explorer.solana.com/address/${programId}?cluster=devnet`} target="_blank" rel="noreferrer" className="hover:text-foreground">
+          <a
+            href={`https://explorer.solana.com/address/${programId}?cluster=devnet`}
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-foreground"
+          >
             {t.footer.chain}
           </a>
         ) : (
           <span>{t.cert.simulation}</span>
         )}
-        <span>{getAIProviderName() === "gemini" ? t.footer.gemini : t.footer.demo}</span>
+        <span>
+          {getAIProviderName() === "gemini" ? t.footer.gemini : t.footer.demo}
+        </span>
       </div>
     </footer>
   );

@@ -1,140 +1,264 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * ProofAPI — the evidence desk. A cool grey desk, white paper, ink, and one saturated colour:
- * seal green, used only for verdicts, the stamp and primary emphasis. Red only for "changed".
- * Single light theme by choice: the product is paper evidence, read in offices and on phones.
- */
-
+/* One semantic system for the site, tools and public evidence. */
 @theme inline {
-  --font-sans: var(--font-plex), ui-sans-serif, "Segoe UI", system-ui, sans-serif;
-  --font-display: var(--font-literata), "PT Serif", Georgia, serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, Consolas, monospace;
-  --font-heading: var(--font-display);
-
+  --font-sans:
+    var(--font-plex), "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --font-mono: var(--font-plex-mono), Consolas, ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface-elevated);
+  --color-popover-foreground: var(--foreground);
   --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--border-strong);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--surface-muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--surface-muted);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--surface-muted);
+  --color-accent-foreground: var(--foreground);
+  --color-ring: var(--brand);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-destructive: var(--danger);
+  --color-info: var(--info);
+  /* Compatibility roles for composed product components. */
+  --color-faint: var(--text-muted);
+  --color-seal: var(--success);
+  --color-seal-soft: var(--success-soft);
+  --color-ok: var(--success);
+  --color-bad: var(--danger);
+  --color-bad-soft: var(--danger-soft);
+  --color-warn: var(--warning);
+  --color-warn-soft: var(--warning-soft);
+  --color-fg: var(--foreground);
+  --color-bg: var(--background);
+  --color-panel: var(--surface);
+  --color-panel-2: var(--surface-muted);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
   --color-desk: var(--background);
-  --color-paper: var(--card);
+  --color-paper: var(--surface);
   --color-ink: var(--foreground);
-  --color-faint: var(--faint);
-  --color-seal: var(--seal);
-  --color-seal-soft: var(--seal-soft);
-  --color-bad: var(--destructive);
-  --color-bad-soft: var(--bad-soft);
-  --color-warn: var(--warn);
-  --color-warn-soft: var(--warn-soft);
-  --color-night: var(--night);
-  --color-night-ink: var(--night-ink);
-  --color-night-muted: var(--night-muted);
-  --color-night-line: var(--night-line);
-
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-
-  --shadow-sheet: 0 1px 2px rgb(15 22 19 / 0.04), 0 18px 40px -18px rgb(15 22 19 / 0.18);
-  --shadow-lift: 0 24px 50px -20px rgb(15 22 19 / 0.32);
-
-  --animate-stamp: stamp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-
-  @keyframes stamp {
-    from { opacity: 0; scale: 1.2; }
-    to { opacity: 1; scale: 1; }
-  }
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+  --shadow-overlay: 0 8px 24px rgb(15 22 19 / 12%);
 }
-
 :root {
-  color-scheme: light;
-  --radius: 0.625rem;
-
-  --background: #f3f5f4;
-  --foreground: #0f1613;
-  --card: #ffffff;
-  --card-foreground: #0f1613;
-  --popover: #ffffff;
-  --popover-foreground: #0f1613;
-  --primary: #0f1613;
-  --primary-foreground: #ffffff;
-  --secondary: #e8ecea;
-  --secondary-foreground: #0f1613;
-  --muted: #eef1ef;
-  --muted-foreground: #56615c;
-  --accent: #eef1ef;
-  --accent-foreground: #0f1613;
-  --destructive: #b8342c;
-  --border: #dde2df;
-  --input: #d3d9d6;
-  --ring: #0a7350;
-
-  --faint: #66706b;
-  --seal: #0a7350;
-  --seal-soft: #e2f1ea;
-  --bad-soft: #f9e7e5;
-  --warn: #8a5d00;
-  --warn-soft: #fbf1db;
-  --night: #0e1512;
-  --night-ink: #e8eeeb;
-  --night-muted: #9aa8a1;
-  --night-line: #26302c;
+  color-scheme: dark;
+  --radius: 8px;
+  --background: #090c0f;
+  --foreground: #f0f2f4;
+  --surface: #101419;
+  --surface-muted: #171d23;
+  --surface-elevated: #171d23;
+  --border: #282f37;
+  --border-strong: #596570;
+  --text-primary: #f0f2f4;
+  --text-secondary: #a9b2bb;
+  --text-muted: #929da8;
+  --primary: #f0f2f4;
+  --primary-hover: #d7dde2;
+  --primary-foreground: #090c0f;
+  --brand: #42c69c;
+  --success: #42c69c;
+  --success-soft: #13352c;
+  --warning: #e2ba68;
+  --warning-soft: #352a17;
+  --danger: #f08079;
+  --danger-soft: #371c1d;
+  --info: #88b6db;
+  --seal: var(--success);
+  --card: var(--surface);
+  --muted: var(--surface-muted);
+  --destructive: var(--danger);
+  --warn: var(--warning);
+  --faint: var(--text-muted);
 }
-
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   html {
     @apply font-sans;
-    scrollbar-color: #c3cbc7 var(--background);
+    scrollbar-color: var(--border-strong) var(--background);
   }
   body {
     @apply bg-background text-foreground antialiased;
-    caret-color: var(--seal);
+    font-size: 15px;
+    line-height: 1.5;
   }
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     text-wrap: balance;
   }
   ::selection {
-    background: var(--seal-soft);
+    background: var(--success-soft);
     color: var(--foreground);
   }
   a {
     text-underline-offset: 4px;
   }
   :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
   }
   table {
     font-variant-numeric: tabular-nums;
   }
+  button:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+  [id] {
+    scroll-margin-top: 80px;
+  }
 }
-
+@layer components {
+  .display {
+    @apply text-[32px] font-semibold leading-10 tracking-tight;
+  }
+  .card-title {
+    @apply text-sm font-medium leading-5;
+  }
+  .body-text {
+    @apply text-[15px] leading-[22px];
+  }
+  .body-secondary {
+    @apply text-[13px] leading-5 text-text-secondary;
+  }
+  .label-text {
+    @apply text-[13px] font-medium leading-5;
+  }
+  .caption {
+    @apply text-xs leading-4 text-text-muted;
+  }
+  .table-text {
+    @apply text-sm leading-5;
+  }
+  .page-title {
+    @apply text-2xl font-semibold leading-8 tracking-tight;
+  }
+  .section-title {
+    @apply text-lg font-semibold leading-6;
+  }
+  .page-intro {
+    @apply mt-2 max-w-2xl text-[15px] leading-[22px] text-text-secondary;
+  }
+  .page-space {
+    @apply py-8 sm:py-10;
+  }
+  .data-label {
+    @apply text-[13px] font-medium text-text-secondary;
+  }
+  .surface {
+    @apply rounded-lg border border-border bg-surface;
+  }
+  .inline-error {
+    @apply rounded-md border border-danger/25 bg-danger-soft px-4 py-3 text-sm text-danger;
+  }
+  .text-link {
+    @apply font-medium underline decoration-border-strong hover:decoration-foreground;
+  }
+  .skip-link {
+    @apply fixed left-4 top-4 z-50 -translate-y-24 rounded-md bg-primary px-4 py-3 text-primary-foreground focus:translate-y-0;
+  }
+}
+@media (pointer: coarse), (max-width: 639px) {
+  [data-slot="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    height: auto;
+    max-width: 100%;
+    white-space: normal;
+    padding-block: 8px;
+  }
+  [data-slot="input"],
+  [data-slot="select-trigger"] {
+    min-height: 44px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Marketing hierarchy within the shared dark product theme. */
+.landing-theme .landing-title {
+  max-width: 900px;
+  font-size: clamp(36px, 5.4vw, 72px);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+/* The product shot is cropped and fades into the page, like a window seen from above. */
+.hero-stage {
+  max-height: 460px;
+  overflow: hidden;
+  text-align: left;
+  -webkit-mask-image: linear-gradient(#000 62%, transparent);
+  mask-image: linear-gradient(#000 62%, transparent);
+}
+@media (max-width: 767px) {
+  .hero-stage {
+    max-height: 520px;
+  }
+}
+.landing-theme .section-title {
+  font-size: 28px;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+.landing-theme .page-intro {
+  line-height: 1.65;
+}
+[data-site-shell] > header {
+  background: var(--background);
+}
+[data-site-shell] > header nav {
+  justify-content: flex-end;
+}
+.landing-theme .surface {
+  border-radius: 12px;
+}
+.landing-theme :focus-visible {
+  outline-color: var(--brand);
+}
+@media (max-width: 639px) {
+  .landing-theme .section-title {
+    font-size: 24px;
   }
 }

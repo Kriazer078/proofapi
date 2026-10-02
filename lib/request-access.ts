@@ -49,7 +49,9 @@ export async function clientIpHash(): Promise<string> {
  * an error rather than a silent fall back to anonymous limits. Otherwise the console session counts.
  */
 export async function resolveCaller(accounts: AccountStore): Promise<Caller> {
-  const key = keyFromHeader((await headers()).get("authorization"));
+  const authorization = (await headers()).get("authorization");
+  const key = keyFromHeader(authorization);
+  if (authorization !== null && !key) throw new UnauthorizedError();
   if (key) {
     const record = await accounts.findActiveKey(hashSecret(key));
     if (!record) throw new UnauthorizedError();

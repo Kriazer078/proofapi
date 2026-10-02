@@ -15,7 +15,7 @@ export interface PublicProof {
   recordHash: string | null;
   provider: string | null;
   model: string | null;
-  output: AnalysisResult | null;
+  output: AnalysisResult | { answer: string } | null;
   metadata: Record<string, unknown> | null;
   isTampered: boolean;
   createdAt: string;
@@ -39,7 +39,7 @@ export function toPublicProof(row: ProofRow, chain: ChainClient): PublicProof {
     recordHash: row.recordHash,
     provider: row.provider,
     model: row.model,
-    output: row.outputJson ? (JSON.parse(row.outputJson) as AnalysisResult) : null,
+    output: row.outputJson ? (JSON.parse(row.outputJson) as PublicProof["output"]) : null,
     metadata: row.metadataJson ? (JSON.parse(row.metadataJson) as Record<string, unknown>) : null,
     isTampered: row.tamperedBackupJson !== null,
     createdAt: row.createdAt.toISOString(),

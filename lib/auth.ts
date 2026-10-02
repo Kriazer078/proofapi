@@ -33,7 +33,7 @@ if (devLoginEnabled()) {
 
 export const authOptions: NextAuthOptions = {
   providers,
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   pages: { signIn: "/signin" },
   callbacks: {
@@ -74,6 +74,9 @@ export interface SignedInUser {
 
 /** The signed-in user for server components and route handlers, or null. */
 export async function currentUser(): Promise<SignedInUser | null> {
+  // Without a secret nobody can be signed in, and NextAuth refuses to read sessions in production.
+  // Treat every caller as signed out so certificates and the public API keep working.
+  if (!authOptions.secret && process.env.NODE_ENV === "production") return null;
   const session = await getServerSession(authOptions);
   const u = session?.user as { id?: string; name?: string | null; login?: string; image?: string | null } | undefined;
   if (!u?.id) return null;

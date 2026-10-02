@@ -1,6 +1,11 @@
 import { NewProofForm } from "@/components/new-proof-form";
-import { getAIProviderName } from "@/lib/config";
+import { getAIProviderName, getChainMode } from "@/lib/config";
 
 export default function NewProofPage() {
-  return <NewProofForm aiProvider={getAIProviderName()} />;
+  return (
+    <NewProofForm
+      aiProvider={getAIProviderName()}
+      liveChain={getChainMode() === "anchor"}
+    />
+  );
 }
