@@ -312,3 +312,11 @@
 [data-slot="button"] > svg.lucide-arrow-right { transition: transform 0.2s var(--ease-out); }
 [data-slot="button"]:hover > svg.lucide-arrow-right { transform: translateX(3px); }
 .pop-in { animation: pa-pop 0.25s var(--ease-out) both; }
+
+/* Form fields show focus with one thin brand border, not a second outline. */
+[data-slot="input"]:focus-visible,
+[data-slot="textarea"]:focus-visible,
+[data-slot="select-trigger"]:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+}
