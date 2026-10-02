@@ -9,7 +9,7 @@ ProofAPI puts a digital seal on an AI result. The input, the AI output and the s
 
 Developer onboarding is available at `/developers`: sign in at `/signin`, create a server API key in `/console/keys`, and test a request in `/console/playground`. The console shows account records and monthly usage. Configure `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` for GitHub sign-in. `AUTH_DEV_LOGIN=1` enables a local development account only; it is ignored in production.
 
-The TypeScript SDK is an installable preview, **not published to npm**. Download `/downloads/proofapi-sdk-0.1.0-preview.1.tgz` from the running site, then run `npm install ./proofapi-sdk-0.1.0-preview.1.tgz`. See [SDK documentation](packages/sdk/README.md). Store `PROOFAPI_API_KEY` only on your server. Use `seal()` after receiving your AI provider's response, `sealHashes()` for fingerprints only, and `verify()` / `evidence()` to inspect the record. Local integration tests use a memory chain; they do not establish live Solana availability.
+The TypeScript SDK is on npm: `npm install proofapi`. See [SDK documentation](packages/sdk/README.md). Store `PROOFAPI_API_KEY` only on your server. Use `seal()` after receiving your AI provider's response, `sealHashes()` for fingerprints only, and `verify()` / `evidence()` to inspect the record. Local integration tests use a memory chain; they do not establish live Solana availability.
 
 ![ProofAPI home page](assets/home.png)
 

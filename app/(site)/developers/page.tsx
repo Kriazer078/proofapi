@@ -3,7 +3,6 @@ import { LinkButton } from "@/components/primitives";
 import { getMessages } from "@/lib/i18n/server";
 import { DEV } from "@/lib/i18n/developer";
 import {
-  SDK_DOWNLOAD,
   SDK_INSTALL,
   SEAL_EXAMPLE,
   VERIFY_EXAMPLE,
@@ -75,13 +74,6 @@ export default async function DevelopersPage() {
           <section id="install" className="border-t pt-8">
             <h2 className="section-title">2. {d.install}</h2>
             <p className="page-intro">{d.installNote}</p>
-            <a
-              href={SDK_DOWNLOAD}
-              download
-              className="mt-4 inline-block text-link text-sm"
-            >
-              {d.download}
-            </a>
             <div className="mt-4">
               {code(SDK_INSTALL, "Terminal · Node.js 20+ · ESM")}
             </div>
@@ -157,7 +149,7 @@ const record = await proofapi.sealHashes({
             <p className="page-intro">{d.limits}</p>
             <div className="mt-4">
               {code(
-                `import { ProofAPIError } from '@proofapi/sdk';
+                `import { ProofAPIError } from 'proofapi';
 try {
   const record = await proofapi.seal({ input, output: answer });
   if (record.status === 'PENDING_CHAIN') {

@@ -1,7 +1,5 @@
-export const SDK_ARCHIVE = "proofapi-sdk-0.1.0-preview.1.tgz";
-export const SDK_DOWNLOAD = `/downloads/${SDK_ARCHIVE}`;
-export const SDK_INSTALL = `npm install ./${SDK_ARCHIVE}`;
-export const SEAL_EXAMPLE = `import { ProofAPI } from '@proofapi/sdk';
+export const SDK_INSTALL = "npm install proofapi";
+export const SEAL_EXAMPLE = `import { ProofAPI } from 'proofapi';
 
 const proofapi = new ProofAPI({
   apiKey: process.env.PROOFAPI_API_KEY,

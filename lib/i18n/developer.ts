@@ -23,7 +23,7 @@ const en = {
     "Account sign-in is not configured on this installation. You can still try the anonymous API in the Playground.",
   install: "Install the SDK",
   installNote:
-    "Preview package · not published to npm yet. Download the archive and install it in your server application.",
+    "The proofapi package on npm. Install it in your server application, not in the browser.",
   download: "Download SDK preview",
   keyStep: "Create a key",
   keyStepText:
@@ -140,7 +140,7 @@ const ru: Copy = {
     "В этой установке вход в аккаунт ещё не настроен. Анонимный API можно попробовать в Playground.",
   install: "Установите SDK",
   installNote:
-    "Preview-пакет · пока не опубликован в npm. Скачайте архив и установите его в серверное приложение.",
+    "Пакет proofapi в npm. Установите его в серверное приложение, а не в браузерный код.",
   download: "Скачать SDK preview",
   keyStep: "Создайте ключ",
   keyStepText:
@@ -255,7 +255,7 @@ const kk: Copy = {
     "Бұл орнатуда аккаунтқа кіру бапталмаған. Анонимді API-ді Playground ішінде тексеруге болады.",
   install: "SDK орнатыңыз",
   installNote:
-    "Preview пакет · npm-де әлі жарияланбаған. Архивті жүктеп, серверлік қолданбаға орнатыңыз.",
+    "npm-дегі proofapi пакеті. Оны браузерге емес, серверлік қолданбаға орнатыңыз.",
   download: "SDK preview жүктеу",
   keyStep: "Кілт жасаңыз",
   keyStepText:

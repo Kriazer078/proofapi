@@ -1,12 +1,43 @@
 {
-  "name": "@proofapi/sdk",
-  "version": "0.1.0-preview.1",
+  "name": "proofapi",
+  "version": "0.1.0",
   "description": "TypeScript client for sealing and verifying AI results with ProofAPI",
-  "type": "module",
+  "keywords": [
+    "ai",
+    "audit",
+    "proof",
+    "solana",
+    "verification",
+    "llm",
+    "agents"
+  ],
+  "homepage": "https://proofapi.vercel.app/developers",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kriazer078/proofapi.git",
+    "directory": "packages/sdk"
+  },
   "license": "MIT",
-  "engines": { "node": ">=20" },
-  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "default": "./dist/index.js" } },
-  "files": ["dist", "README.md"],
-  "scripts": { "build": "tsc -p tsconfig.json", "prepack": "npm run build" },
-  "publishConfig": { "access": "public" }
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepack": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

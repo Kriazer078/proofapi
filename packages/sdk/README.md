@@ -1,18 +1,13 @@
-# @proofapi/sdk
+# proofapi
 
-Preview TypeScript / ESM client for Node.js 20+. This package is built in this repository and is **not yet published to npm**.
-
-Build and install locally:
+TypeScript / ESM client for [ProofAPI](https://proofapi.vercel.app) on Node.js 20+. ProofAPI seals AI answers on Solana so anyone can check with a link that they were not changed.
 
 ```sh
-cd packages/sdk
-npm pack
-# From your application's directory:
-npm install /absolute/path/to/proofapi-sdk-0.1.0-preview.1.tgz
+npm install proofapi
 ```
 
 ```ts
-import { ProofAPI } from '@proofapi/sdk';
+import { ProofAPI } from 'proofapi';
 
 const proofapi = new ProofAPI({ apiKey: process.env.PROOFAPI_API_KEY });
 const record = await proofapi.seal({
