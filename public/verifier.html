@@ -5,42 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ProofAPI Independent Verifier</title>
 <style>
-  :root { --bg: #f6f7f9; --card: #fff; --ink: #14161b; --muted: #5c6370; --line: #d9dde3; --ok: #0e6e4a; --bad: #b3261e; --accent: #2447d6; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0f1115; --card: #171a20; --ink: #e8eaee; --muted: #9aa1ad; --line: #2b3038; --ok: #4cc38a; --bad: #ff7a70; --accent: #8ea2ff; } }
+  :root { color-scheme: dark; --bg: #090c0f; --card: #101419; --ink: #f0f2f4; --muted: #a9b2bb; --line: #282f37; --input: #596570; --ok: #42c69c; --bad: #f08079; --warning: #e2ba68; --accent: #f0f2f4; --focus: #42c69c; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; padding: 32px 16px; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; padding: 24px 16px; }
   main { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
-  h1 { margin: 0; font-size: 28px; line-height: 1.2; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  header strong { font-size: 16px; } header span { color: var(--muted); font-size: 13px; }
+  h1 { margin: 0; font-size: 24px; line-height: 1.3; font-weight: 600; }
   p { margin: 0; color: var(--muted); }
-  form { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; }
-  label { font-weight: 600; font-size: 14px; display: grid; gap: 6px; }
-  input[type=text] { font: 14px ui-monospace, Consolas, monospace; padding: 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
-  button { justify-self: start; font: 600 15px system-ui, sans-serif; padding: 11px 18px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
-  button:disabled { opacity: .6; cursor: default; }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  #verdict { font-size: 22px; font-weight: 700; }
-  #verdict.ok { color: var(--ok); } #verdict.bad { color: var(--bad); }
-  ul { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
-  li { display: grid; grid-template-columns: 28px 1fr; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); }
-  li:first-child { border-top: 0; }
-  li .m { font-weight: 700; } li.ok .m { color: var(--ok); } li.bad .m { color: var(--bad); }
-  li small { display: block; color: var(--muted); font: 12px ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+  form { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 20px; display: grid; gap: 16px; }
+  label { font-weight: 500; font-size: 14px; display: grid; gap: 8px; }
+  input { width: 100%; min-width: 0; font: 14px "Segoe UI", system-ui, sans-serif; padding: 10px 12px; border: 1px solid var(--input); border-radius: 6px; background: var(--card); color: var(--ink); min-height: 44px; }
+  input[type=file] { padding: 8px; } input[type=text] { font-family: Consolas, ui-monospace, monospace; }
+  button { justify-self: start; font: 500 14px "Segoe UI", sans-serif; padding: 10px 16px; min-height: 44px; border: 1px solid transparent; border-radius: 6px; background: var(--accent); color: var(--card); cursor: pointer; }
+  button:hover { opacity: .88; } button:disabled { opacity: .5; cursor: wait; }
+  select { min-height: 44px; font: inherit; color: var(--ink); border: 1px solid var(--input); border-radius: 6px; background: var(--card); padding: 4px 8px; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  #verdict { font-size: 20px; font-weight: 600; } #verdict.ok { color: var(--ok); } #verdict.bad { color: var(--bad); } #verdict.warn { color: var(--warning); }
+  ul { list-style: none; margin: 12px 0 0; padding: 0; background: var(--card); border: 1px solid var(--line); border-radius: 8px; }
+  li { display: grid; grid-template-columns: 20px minmax(0,1fr); gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); } li:first-child { border-top: 0; }
+  li .m { font-weight: 600; } li.ok .m { color: var(--ok); } li.bad .m { color: var(--bad); }
+  li small { display: block; color: var(--muted); font: 13px/1.5 Consolas, ui-monospace, monospace; overflow-wrap: anywhere; }
+  .note { font-size: 13px; padding-top: 16px; border-top: 1px solid var(--line); }
 </style>
 </head>
 <body>
 <main>
-  <h1>Verify a ProofAPI evidence pack</h1>
-  <p>This page checks the pack directly against Solana. It never contacts ProofAPI, so you can save it and run it anywhere.</p>
+  <header><strong>ProofAPI <span>· Independent verifier</span></strong><select id="language" aria-label="Language"><option value="en">EN</option><option value="ru">RU</option><option value="kk">KZ</option></select></header>
+  <h1 id="title">Verify a ProofAPI evidence pack</h1>
+  <p id="intro">This page checks the pack directly against Solana. It never contacts ProofAPI, so you can save it and run it anywhere.</p>
   <form id="form">
-    <label>Evidence pack (.json)<input id="pack" type="file" accept=".json,application/json" required></label>
-    <label>Solana RPC endpoint<input id="rpc" type="text" value="https://api.devnet.solana.com" required></label>
+    <label><span id="pack-label">Evidence pack (.json)</span><input id="pack" type="file" accept=".json,application/json" required></label>
+    <label><span id="rpc-label">Solana RPC endpoint</span><input id="rpc" type="text" value="https://api.devnet.solana.com" required></label>
     <button id="run" type="submit">Verify</button>
   </form>
   <section aria-live="polite">
     <div id="verdict"></div>
     <ul id="checks" hidden></ul>
   </section>
-  <p>What this proves: the input, AI output and metadata are byte-for-byte what the issuer recorded on Solana at the shown time. It does not prove the AI answer is correct.</p>
+  <p id="scope" class="note">What this proves: the input, AI output and metadata are byte-for-byte what the issuer recorded on Solana at the shown time. It does not prove the AI answer is correct.</p>
 </main>
 <script>
 // CORE-START
@@ -160,7 +163,26 @@ const ProofVerifierCore = (() => {
 // CORE-END
 
 const LABELS = { format: "Evidence pack", account: "Solana account", owner: "Owned by the ProofAPI program", type: "Account type", issuer: "Issuer", sequence: "Record number", proof_id: "Proof id", input: "Input unchanged", output: "AI output unchanged", metadata: "Metadata unchanged", record: "Record hash", time: "Time on Solana" };
+const LOCAL_LABELS = {
+  en: LABELS,
+  ru: { format: "Файл-доказательство", account: "Аккаунт Solana", owner: "Аккаунт программы ProofAPI", type: "Тип аккаунта", issuer: "Выдавший", sequence: "Номер записи", proof_id: "ID сертификата", input: "Исходные данные", output: "Ответ ИИ", metadata: "Метаданные", record: "Хэш записи", time: "Время Solana" },
+  kk: { format: "Дәлел файлы", account: "Solana аккаунты", owner: "ProofAPI бағдарламасының аккаунты", type: "Аккаунт түрі", issuer: "Беруші", sequence: "Жазба нөмірі", proof_id: "Сертификат ID", input: "Кіріс деректері", output: "ЖИ жауабы", metadata: "Метадеректер", record: "Жазба хэші", time: "Solana уақыты" },
+};
 const $ = (id) => document.getElementById(id);
+
+const COPY = {
+  en: { title: "Verify an evidence file", intro: "Checks the file directly against Solana without contacting ProofAPI. Save this page to run it independently. Solana devnet is a test network.", pack: "Evidence file (.json)", rpc: "Solana RPC endpoint", run: "Verify", checking: "Checking against Solana…", unavailable: "Verification unavailable. Check the file and connection, then try again.", scope: "This verifies the recorded data, not the correctness of the AI answer. A failed connection does not imply that the data changed.", VERIFIED: "Verified", FAILED: "Verification failed", NOT_ON_CHAIN: "Not found on Solana" },
+  ru: { title: "Проверить файл-доказательство", intro: "Проверяет файл напрямую в Solana, не обращаясь к ProofAPI. Сохраните страницу для независимой проверки. Solana devnet — тестовая сеть.", pack: "Файл-доказательство (.json)", rpc: "Адрес Solana RPC", run: "Проверить", checking: "Проверяем запись в Solana…", unavailable: "Проверка недоступна. Проверьте файл и соединение и повторите попытку.", scope: "Проверяется запись данных, а не правильность ответа ИИ. Ошибка соединения не означает, что данные изменены.", VERIFIED: "Подтверждено", FAILED: "Проверка не пройдена", NOT_ON_CHAIN: "Запись в Solana не найдена" },
+  kk: { title: "Дәлел файлын тексеру", intro: "Файлды ProofAPI-ға жүгінбей, Solana арқылы тікелей тексереді. Тәуелсіз тексеру үшін бетті сақтаңыз. Solana devnet — сынақ желісі.", pack: "Дәлел файлы (.json)", rpc: "Solana RPC мекенжайы", run: "Тексеру", checking: "Solana жазбасы тексерілуде…", unavailable: "Тексеру қолжетімсіз. Файл мен байланысты тексеріп, қайталаңыз.", scope: "ЖИ жауабының дұрыстығы емес, дерек жазбасы тексеріледі. Байланыс қатесі деректердің өзгергенін білдірмейді.", VERIFIED: "Расталды", FAILED: "Тексеру өтпеді", NOT_ON_CHAIN: "Solana жазбасы табылмады" },
+};
+let language = (document.cookie.match(/(?:^|; )lang=(en|ru|kk)/)?.[1] || navigator.language.slice(0,2));
+if (!COPY[language]) language = "en";
+function translate() {
+  const c = COPY[language]; document.documentElement.lang = language; $("language").value = language;
+  for (const [id,key] of [["title","title"],["intro","intro"],["pack-label","pack"],["rpc-label","rpc"],["run","run"],["scope","scope"]]) $(id).textContent = c[key];
+}
+$("language").addEventListener("change", () => { language = $("language").value; translate(); $("verdict").textContent = ""; $("checks").hidden = true; });
+translate();
 
 $("form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -168,15 +190,15 @@ $("form").addEventListener("submit", async (e) => {
   const list = $("checks");
   $("run").disabled = true;
   verdict.className = "";
-  verdict.textContent = "Checking against Solana…";
+  verdict.textContent = COPY[language].checking;
   list.hidden = true;
   try {
     const pack = JSON.parse(await $("pack").files[0].text());
     const rpc = $("rpc").value.trim() || pack.rpc_url;
     const account = pack && pack.proof_account ? await ProofVerifierCore.fetchAccount(rpc, pack.proof_account) : null;
     const result = await ProofVerifierCore.verifyPack(pack, account);
-    verdict.textContent = { VERIFIED: "Verified", FAILED: "Verification failed", NOT_ON_CHAIN: "Not found on Solana" }[result.status];
-    verdict.className = result.status === "VERIFIED" ? "ok" : "bad";
+    verdict.textContent = COPY[language][result.status];
+    verdict.className = result.status === "VERIFIED" ? "ok" : result.status === "NOT_ON_CHAIN" ? "warn" : "bad";
     list.replaceChildren(...result.checks.map((c) => {
       const li = document.createElement("li");
       li.className = c.ok ? "ok" : "bad";
@@ -184,7 +206,7 @@ $("form").addEventListener("submit", async (e) => {
       mark.className = "m";
       mark.textContent = c.ok ? "✓" : "✗";
       const body = document.createElement("div");
-      body.textContent = LABELS[c.id] || c.id;
+      body.textContent = LOCAL_LABELS[language][c.id] || c.id;
       const small = document.createElement("small");
       small.textContent = c.detail;
       body.append(small);
@@ -193,8 +215,8 @@ $("form").addEventListener("submit", async (e) => {
     }));
     list.hidden = false;
   } catch (err) {
-    verdict.className = "bad";
-    verdict.textContent = `Could not verify: ${err.message}`;
+    verdict.className = "";
+    verdict.textContent = COPY[language].unavailable;
   } finally {
     $("run").disabled = false;
   }

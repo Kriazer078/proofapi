@@ -30,6 +30,8 @@ export interface ProofOutcome {
 
 const HEX64 = /^[0-9a-f]{64}$/;
 const RETRY_LOOKBACK = 20;
+/** Upper bound for each side of a sealed AI exchange, to keep requests and storage bounded. */
+export const SEAL_MAX_CHARS = 200_000;
 
 function emptyRow(id: string, createdAt: Date): Omit<ProofRow, "mode" | "inputHash" | "outputHash" | "metadataHash"> {
   return {
@@ -127,6 +129,52 @@ export function createProofService(deps: ProofServiceDeps) {
   }
 
   return {
+    /** Seals an AI answer produced elsewhere (an agent, another model) exactly as given. */
+    async createSealProof(input: { input: string; output: string; model?: string; label?: string; agent?: AgentFields }): Promise<ProofOutcome> {
+      const text = (input.input ?? "").trim();
+      const answer = (input.output ?? "").trim();
+      if (!text || !answer) throw new ValidationError("Send both the AI input and the AI output", "seal_missing");
+      if (text.length > SEAL_MAX_CHARS || answer.length > SEAL_MAX_CHARS) {
+        throw new ValidationError(`Input and output must each be under ${SEAL_MAX_CHARS} characters`, "seal_too_large");
+      }
+      const agent = input.agent ?? {};
+      const createdAt = now();
+      const salt = makeSalt();
+      const model = (input.model ?? "").trim().slice(0, 100) || "unspecified";
+      const label = (input.label ?? "").trim().slice(0, 120) || "AI answer";
+      const metadata: Record<string, string> = {
+        provider: "client",
+        model,
+        model_attestation: "declared",
+        created_at: createdAt.toISOString(),
+        task: "seal",
+        label,
+      };
+      if (agent.agentId) metadata.agent_id = agent.agentId;
+      if (agent.toolName) metadata.tool_name = agent.toolName;
+      const bytes = Buffer.from(text, "utf8");
+      const outputJson = canonicalJson({ answer });
+      const metadataJson = canonicalJson(metadata);
+      const row: ProofRow = {
+        ...emptyRow(newId(), createdAt),
+        ...agentColumns(agent),
+        mode: "full",
+        salt,
+        inputBlob: bytes,
+        inputFileName: label,
+        inputText: text,
+        outputJson,
+        metadataJson,
+        inputHash: saltedHash(salt, bytes),
+        outputHash: saltedHash(salt, outputJson),
+        metadataHash: saltedHash(salt, metadataJson),
+        provider: "client",
+        model,
+      };
+      await deps.repo.create(row);
+      return anchor(row);
+    },
+
     async createProof(input: { fileName: string; bytes: Buffer; agent?: AgentFields }): Promise<ProofOutcome> {
       const agent = input.agent ?? {};
       const text = await extractText(input.fileName, input.bytes);
@@ -201,8 +249,12 @@ export function createProofService(deps: ProofServiceDeps) {
       const row = await load(id);
       requireFull(row);
       if (row.tamperedBackupJson) return row;
-      const original = JSON.parse(row.outputJson) as AnalysisResult;
-      const forged = canonicalJson({ ...original, riskScore: 5, issues: [], summary: "No notable risk factors found." });
+      const original = JSON.parse(row.outputJson) as AnalysisResult | { answer: string };
+      // A contract review gets a softened score; any other sealed answer gets its wording changed.
+      const forged =
+        "answer" in original
+          ? canonicalJson({ ...original, answer: `${original.answer} (edited after sealing)` })
+          : canonicalJson({ ...original, riskScore: 5, issues: [], summary: "No notable risk factors found." });
       await deps.repo.update(id, { outputJson: forged, tamperedBackupJson: row.outputJson });
       return load(id);
     },

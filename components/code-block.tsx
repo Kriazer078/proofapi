@@ -1,32 +1,60 @@
 "use client";
-
 import { useState } from "react";
-import { Icon } from "./ui";
-
-/** A code sample with a copy button. Scrolls sideways inside itself on narrow screens. */
-export function CodeBlock({ code, label, copyLabel, copiedLabel }: { code: string; label?: string; copyLabel: string; copiedLabel: string }) {
+import { Button, Icon } from "./primitives";
+import { useI18n } from "./i18n";
+import { UX } from "@/lib/i18n/ux";
+export function CodeBlock({
+  code,
+  label,
+  copyLabel,
+  copiedLabel,
+}: {
+  code: string;
+  label?: string;
+  copyLabel: string;
+  copiedLabel: string;
+}) {
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState(false);
+  const { locale } = useI18n();
   async function copy() {
     try {
       await navigator.clipboard.writeText(code);
+      setError(false);
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
-      setCopied(false);
+      setError(true);
     }
   }
   return (
-    <div className="min-w-0 overflow-hidden rounded-xl border border-line bg-bg">
-      <div className="flex items-center justify-between border-b border-line px-4 py-2">
-        <span className="font-mono text-xs text-faint">{label ?? "bash"}</span>
-        <button type="button" onClick={copy} className="inline-flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-fg">
-          <Icon name={copied ? "check" : "copy"} className="size-3.5" />
+    <div className="surface min-w-0 overflow-hidden">
+      <div className="flex items-center justify-between gap-3 border-b bg-surface-muted/40 px-3 py-2">
+        <span className="font-mono text-[13px] text-text-secondary">
+          {label ?? "bash"}
+        </span>
+        <Button variant="ghost" size="sm" onClick={copy}>
+          <Icon name={copied ? "check" : "copy"} />
           {copied ? copiedLabel : copyLabel}
-        </button>
+        </Button>
       </div>
-      <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-6 text-fg">
+      <pre
+        tabIndex={0}
+        aria-label={label ?? "bash"}
+        className="overflow-x-auto p-4 font-mono text-[13px] leading-5"
+      >
         <code>{code}</code>
       </pre>
+      {copied && (
+        <span role="status" className="sr-only">
+          {copiedLabel}
+        </span>
+      )}
+      {error && (
+        <p role="alert" className="px-4 pb-3 text-[13px] text-danger">
+          {UX[locale].copyError}
+        </p>
+      )}
     </div>
   );
 }

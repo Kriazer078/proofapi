@@ -1,3 +1,5 @@
+import { CONSOLE, type ConsoleCopy } from "./console";
+import { LANDING, type Landing } from "./landing";
 import { MARKETING, type Marketing } from "./marketing";
 
 /** All interface copy. Plain words for people who have never used a blockchain. */
@@ -32,7 +34,7 @@ const en = {
     faqTitle: "Questions",
     faq: [
       { q: "Do I need a crypto wallet?", a: "No. Just open the site." },
-      { q: "Can anyone see my document?", a: "Other users can't. Only the seal goes to the blockchain, and the document can't be rebuilt from it. To review the text, the AI provider (Google Gemini) processes it." },
+      { q: "Can anyone see my document?", a: "Anyone with the certificate link can view the result and download the evidence file, including the document. Only fingerprints go on-chain. In hash-only mode your content stays with you." },
       { q: "Where is the seal kept?", a: "In the public Solana blockchain. Once written, it can't be changed or deleted, even by ProofAPI." },
       { q: "Does it prove the AI is right?", a: "No. It proves the answer hasn't changed since it was sealed." },
       { q: "How much does it cost?", a: "It's free during the beta." },
@@ -175,7 +177,7 @@ const en = {
 };
 
 type BaseMessages = typeof en;
-export type Messages = BaseMessages & { mk: Marketing };
+export type Messages = BaseMessages & { mk: Marketing; lp: Landing; cs: ConsoleCopy };
 
 const ru: BaseMessages = {
   nav: { check: "Проверить", journal: "Журнал", cta: "Получить сертификат", language: "Язык", menu: "Меню" },
@@ -202,7 +204,7 @@ const ru: BaseMessages = {
     faqTitle: "Частые вопросы",
     faq: [
       { q: "Нужен ли криптокошелёк?", a: "Нет. Просто откройте сайт." },
-      { q: "Видит ли кто-то мой документ?", a: "Другие пользователи — нет. В блокчейн попадает только печать, восстановить по ней документ нельзя. Для проверки текст обрабатывает ИИ-провайдер (Google Gemini)." },
+      { q: "Видит ли кто-то мой документ?", a: "Любой обладатель ссылки видит результат и может скачать файл-доказательство с документом. В блокчейн попадают только отпечатки. В режиме отпечатков содержимое остаётся у вас." },
       { q: "Где хранится печать?", a: "В публичном блокчейне Solana. После записи её нельзя изменить или удалить, даже нам." },
       { q: "Доказывает ли это, что ИИ прав?", a: "Нет. Это доказывает, что ответ не меняли после того, как поставили печать." },
       { q: "Сколько это стоит?", a: "Бесплатно на время бета-версии." },
@@ -369,7 +371,7 @@ const kk: BaseMessages = {
     faqTitle: "Жиі қойылатын сұрақтар",
     faq: [
       { q: "Крипто әмиян керек пе?", a: "Жоқ. Сайтты ашсаңыз болғаны." },
-      { q: "Құжатымды біреу көре ме?", a: "Басқа пайдаланушылар көрмейді. Блокчейнге тек мөр түседі, одан құжатты қалпына келтіру мүмкін емес. Тексеру үшін мәтінді ЖИ провайдері (Google Gemini) өңдейді." },
+      { q: "Құжатымды біреу көре ме?", a: "Сілтемесі бар кез келген адам нәтижені көріп, құжаты бар дәлел файлын жүктей алады. Блокчейнге тек іздер түседі. Іздер режимінде мазмұн өзіңізде қалады." },
       { q: "Мөр қайда сақталады?", a: "Solana ашық блокчейнінде. Жазылғаннан кейін оны өзгерту немесе жою мүмкін емес, тіпті бізге де." },
       { q: "Бұл ЖИ-дің дұрыс екенін дәлелдей ме?", a: "Жоқ. Бұл мөр басылғаннан кейін жауаптың өзгермегенін дәлелдейді." },
       { q: "Бағасы қанша?", a: "Бета кезінде тегін." },
@@ -512,9 +514,9 @@ const kk: BaseMessages = {
 };
 
 export const MESSAGES: Record<Locale, Messages> = {
-  en: { ...en, mk: MARKETING.en },
-  ru: { ...ru, mk: MARKETING.ru },
-  kk: { ...kk, mk: MARKETING.kk },
+  en: { ...en, mk: MARKETING.en, lp: LANDING.en, cs: CONSOLE.en },
+  ru: { ...ru, mk: MARKETING.ru, lp: LANDING.ru, cs: CONSOLE.ru },
+  kk: { ...kk, mk: MARKETING.kk, lp: LANDING.kk, cs: CONSOLE.kk },
 };
 
 /** Mock AI issue names, translated for display. */
@@ -552,8 +554,8 @@ export function formatDate(unixSeconds: number, locale: Locale): string {
   const d = new Date(unixSeconds * 1000);
   // Browsers ship little Kazakh date data, so this one is spelled out by hand.
   if (locale === "kk") {
-    const time = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-    return `${d.getFullYear()} ж. ${d.getDate()} ${KK_MONTHS[d.getMonth()]}, ${time}`;
+    const time = `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+    return `${d.getUTCFullYear()} ж. ${d.getUTCDate()} ${KK_MONTHS[d.getUTCMonth()]}, ${time} UTC`;
   }
   return new Intl.DateTimeFormat(INTL[locale], {
     day: "numeric",
@@ -561,5 +563,7 @@ export function formatDate(unixSeconds: number, locale: Locale): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
+    timeZoneName: "short",
   }).format(d);
 }

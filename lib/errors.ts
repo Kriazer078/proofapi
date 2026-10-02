@@ -38,8 +38,10 @@ export class ForbiddenError extends Error {
 
 /** Too many requests in the current window. Maps to HTTP 429. */
 export class RateLimitError extends Error {
-  readonly code = "rate_limited";
-  constructor(message = "Too many certificates from this address. Please try again in an hour.") {
+  constructor(
+    message = "Too many certificates from this address. Please try again in an hour.",
+    readonly code = "rate_limited",
+  ) {
     super(message);
     this.name = "RateLimitError";
   }
@@ -51,5 +53,16 @@ export class AIUnavailableError extends Error {
   constructor(message = "The AI service is busy right now. Please try again in a minute.") {
     super(message);
     this.name = "AIUnavailableError";
+  }
+}
+
+/** Missing or invalid credentials. Maps to HTTP 401. */
+export class UnauthorizedError extends Error {
+  constructor(
+    message = "This API key isn't valid. Check it in the console or create a new one.",
+    readonly code = "invalid_key",
+  ) {
+    super(message);
+    this.name = "UnauthorizedError";
   }
 }

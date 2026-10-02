@@ -1,99 +1,118 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useI18n } from "./i18n";
 import { SealStamp } from "./seal-stamp";
-import { Icon } from "./ui";
-
-async function sha256(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+import { Button, Icon } from "./primitives";
+async function sha256(text: string) {
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text),
+  );
+  return Array.from(new Uint8Array(buf), (b) =>
+    b.toString(16).padStart(2, "0"),
+  ).join("");
 }
-
-/** First 16 hex characters of the real SHA-256, in four blocks people can compare by eye. */
-const blocks = (hex: string) => (hex ? hex.slice(0, 16).toUpperCase().match(/.{4}/g)! : ["····", "····", "····", "····"]);
-
-/** Edit the AI answer and watch the seal code stop matching. Hashes are real SHA-256. */
 export function TamperDemo() {
   const { t } = useI18n();
-  const original = t.demo.lines;
-  const edited = original.map(([k, v]) => [k, v.replace("31 / 100", "12 / 100")] as [string, string]);
-  const [isEdited, setEdited] = useState(false);
-  const [recorded, setRecorded] = useState("");
-  const [current, setCurrent] = useState("");
-  const lines = isEdited ? edited : original;
-  const join = (ls: [string, string][]) => ls.map(([k, v]) => `${k}: ${v}`).join("\n");
-
+  const [edited, setEdited] = useState(false);
+  const [hashes, setHashes] = useState<{
+    original: string;
+    current: string;
+  } | null>(null);
+  const [failed, setFailed] = useState(false);
+  const lines = t.demo.lines.map(([k, v]) => [
+    k,
+    edited ? v.replace("31 / 100", "12 / 100") : v,
+  ]);
   useEffect(() => {
-    sha256(join(original)).then(setRecorded);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [t]);
-  useEffect(() => {
-    sha256(join(lines)).then(setCurrent);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdited, t]);
-
-  const match = recorded !== "" && recorded === current;
-  const rec = blocks(recorded);
-  const now = blocks(current);
-
+    let active = true;
+    setHashes(null);
+    setFailed(false);
+    const text = (ls: string[][]) =>
+      ls.map(([k, v]) => `${k}: ${v}`).join("\n");
+    const current = t.demo.lines.map(([k, v]) => [
+      k,
+      edited ? v.replace("31 / 100", "12 / 100") : v,
+    ]);
+    Promise.all([sha256(text(t.demo.lines)), sha256(text(current))])
+      .then(([original, now]) => {
+        if (active) setHashes({ original, current: now });
+      })
+      .catch(() => {
+        if (active) setFailed(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [edited, t]);
+  const match = hashes?.original === hashes?.current;
   return (
-    <div className="grid gap-6 md:grid-cols-[1.2fr_1fr] md:items-stretch">
-      <div className="rounded-2xl border border-line bg-panel/80 p-5">
-        <div className="text-xs font-medium text-faint">{t.demo.label}</div>
-        <dl className="mt-3 grid gap-2 text-[15px]">
-          {lines.map(([k, v], i) => {
-            const changed = v !== original[i][1];
-            return (
-              <div key={k} className={`grid grid-cols-[minmax(0,11rem)_1fr] gap-3 rounded-md px-2 py-1 transition-colors ${changed ? "bg-bad/15" : ""}`}>
-                <dt className="text-muted">{k}</dt>
-                <dd className={changed ? "font-semibold text-bad" : "text-fg"}>{v}</dd>
-              </div>
-            );
-          })}
+    <div className="surface grid overflow-hidden md:grid-cols-2">
+      <div className="p-5">
+        <h3 className="data-label">{t.demo.label}</h3>
+        <dl className="mt-3 space-y-2 text-sm">
+          {lines.map(([k, v], i) => (
+            <div
+              key={k}
+              className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4"
+            >
+              <dt className="text-text-secondary">{k}</dt>
+              <dd
+                className={`break-words ${v !== t.demo.lines[i][1] ? "font-medium text-danger" : ""}`}
+              >
+                {v}
+              </dd>
+            </div>
+          ))}
         </dl>
-        <button
-          type="button"
-          onClick={() => setEdited((v) => !v)}
-          className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border border-line-strong text-sm font-medium transition-colors hover:bg-white/[0.06]"
+        <Button
+          className="mt-5"
+          onClick={() => setEdited(!edited)}
+          disabled={!hashes && !failed}
         >
-          <Icon name={isEdited ? "refresh" : "edit"} />
-          {isEdited ? t.demo.restore : t.demo.fake}
-        </button>
+          <Icon name={edited ? "refresh" : "edit"} />
+          {edited ? t.demo.restore : t.demo.fake}
+        </Button>
       </div>
-
-      <div role="status" className="flex flex-col justify-between gap-6 rounded-2xl border border-line bg-panel/80 p-5">
-        <div className="flex items-center gap-4">
+      <div className="border-t bg-surface-muted/40 p-5 md:border-t-0 md:border-l">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-3"
+        >
           <SealStamp
-            state={recorded ? (match ? "ok" : "bad") : "checking"}
-            word={match ? t.mk.seal.genuine : t.mk.seal.changed}
+            state={!hashes ? "checking" : match ? "ok" : "bad"}
+            word={!hashes ? "" : match ? t.mk.seal.genuine : t.mk.seal.changed}
             ring={t.mk.seal.ring}
-            size={84}
+            size={56}
           />
-          <div className={`text-lg font-semibold ${match ? "text-ok" : "text-bad"}`}>{match ? t.demo.ok : t.demo.bad}</div>
+          <p
+            className={`text-sm font-semibold ${!hashes ? "text-text-secondary" : match ? "text-success" : "text-danger"}`}
+          >
+            {failed
+              ? t.errors.generic
+              : !hashes
+                ? t.cert.checking
+                : match
+                  ? t.demo.ok
+                  : t.demo.bad}
+          </p>
         </div>
-        <div className="grid gap-3 font-mono text-sm">
-          <CodeRow label={t.demo.seal} codes={rec} />
-          <CodeRow label={t.cert.now} codes={now} compare={rec} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CodeRow({ label, codes, compare }: { label: string; codes: string[]; compare?: string[] }) {
-  return (
-    <div>
-      <div className="mb-1.5 font-sans text-xs text-faint">{label}</div>
-      <div className="grid grid-cols-4 gap-1.5">
-        {codes.map((c, i) => {
-          const differs = compare !== undefined && compare[i] !== c;
-          return (
-            <span key={i} className={`rounded-md border px-2 py-1 text-center transition-colors ${differs ? "border-bad/40 bg-bad/10 text-bad" : "border-line-strong text-muted"}`}>
-              {c}
-            </span>
-          );
-        })}
+        <dl className="mt-4 space-y-3">
+          {[
+            [t.demo.seal, hashes?.original],
+            [t.cert.now, hashes?.current],
+          ].map(([label, code]) => (
+            <div key={label}>
+              <dt className="text-[13px] text-text-secondary">{label}</dt>
+              <dd className="mt-1 break-all font-mono text-[13px]">
+                {code
+                  ? code.slice(0, 16).toUpperCase().match(/.{4}/g)?.join(" ")
+                  : "…"}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </div>
   );
