@@ -3,6 +3,7 @@ import { LinkButton } from "@/components/primitives";
 import { getMessages } from "@/lib/i18n/server";
 import { DEV } from "@/lib/i18n/developer";
 import {
+  MCP_CONFIG,
   SDK_INSTALL,
   SEAL_EXAMPLE,
   VERIFY_EXAMPLE,
@@ -17,6 +18,7 @@ export default async function DevelopersPage() {
     ["request", d.requestStep],
     ["verify", d.verifyStep],
     ["hash-only", d.hashTitle],
+    ["mcp", d.mcpTitle],
     ["reference", d.references],
     ["errors", d.errors],
   ];
@@ -32,9 +34,6 @@ export default async function DevelopersPage() {
     <div className="page-space">
       <div className="flex flex-wrap items-start justify-between gap-5">
         <div>
-          <p className="mb-3 font-mono text-xs text-text-muted">
-            ProofAPI / Docs
-          </p>
           <h1 className="page-title">{d.quickstart}</h1>
           <p className="page-intro">{d.lead}</p>
         </div>
@@ -104,12 +103,18 @@ const salt = randomBytes(32); // keep the salt and original bytes
 const hash = (text: string) => createHash('sha256')
   .update(Buffer.concat([salt, Buffer.from(text)])).digest('hex');
 const record = await proofapi.sealHashes({
-  input_hash: hash(input), output_hash: hash(answer),
-  metadata_hash: hash(JSON.stringify({ model: 'your-model' })),
+  inputHash: hash(input), outputHash: hash(answer),
+  metadataHash: hash(JSON.stringify({ model: 'your-model' })),
 });`,
                 "TypeScript",
               )}
             </div>
+          </section>
+          <section id="mcp" className="border-t pt-8">
+            <h2 className="section-title">{d.mcpTitle}</h2>
+            <p className="page-intro">{d.mcpText}</p>
+            <div className="mt-4">{code(MCP_CONFIG, "mcp.json")}</div>
+            <p className="mt-3 text-sm text-text-secondary">{d.mcpNote}</p>
           </section>
           <section id="reference" className="border-t pt-8">
             <h2 className="section-title">{d.references}</h2>

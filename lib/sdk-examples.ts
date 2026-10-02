@@ -19,3 +19,13 @@ console.log(verification.result.status);
 // VERIFIED | FAILED | NOT_ON_CHAIN
 
 const evidence = await proofapi.evidence(record.id);`;
+
+export const MCP_CONFIG = `{
+  "mcpServers": {
+    "proofapi": {
+      "command": "npx",
+      "args": ["-y", "-p", "proofapi", "proofapi-mcp"],
+      "env": { "PROOFAPI_API_KEY": "pk_live_..." }
+    }
+  }
+}`;

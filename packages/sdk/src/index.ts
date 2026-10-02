@@ -15,7 +15,16 @@ export interface SealResult {
   outputHash: string;
   chainError: string | null;
 }
+/** SHA-256 fingerprints (64 hex characters) computed on your side. The data itself is never sent. */
 export interface HashInput {
+  inputHash: string;
+  outputHash: string;
+  metadataHash: string;
+  agentId?: string;
+  toolName?: string;
+}
+/** The field names used by 0.1.0; still accepted. */
+export interface LegacyHashInput {
   input_hash: string;
   output_hash: string;
   metadata_hash: string;
@@ -49,6 +58,12 @@ export interface ProofAPIOptions {
   timeoutMs?: number;
   fetch?: typeof globalThis.fetch;
 }
+/** SHA-256 of a UTF-8 string as lowercase hex, for use with sealHashes(). */
+export async function sha256Hex(text: string): Promise<string> {
+  const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export class ProofAPIError extends Error {
   constructor(
     message: string,
@@ -104,10 +119,20 @@ export class ProofAPI {
     return this.request("/api/v1/seal", "POST", input, options?.signal);
   }
   sealHashes(
-    input: HashInput,
+    input: HashInput | LegacyHashInput,
     options?: { signal?: AbortSignal },
   ): Promise<HashResult> {
-    return this.request("/api/proofs/hashes", "POST", input, options?.signal);
+    const body =
+      "inputHash" in input
+        ? {
+            input_hash: input.inputHash,
+            output_hash: input.outputHash,
+            metadata_hash: input.metadataHash,
+            agent_id: input.agentId,
+            tool_name: input.toolName,
+          }
+        : input;
+    return this.request("/api/proofs/hashes", "POST", body, options?.signal);
   }
   verify(
     id: string,

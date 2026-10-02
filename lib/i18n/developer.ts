@@ -98,6 +98,9 @@ const en = {
     "Install the preview SDK",
     "Seal and verify a result",
   ],
+  mcpTitle: "Connect an AI agent (MCP)",
+  mcpText: "Agents in Claude, Cursor and other MCP clients can seal their own answers without code. Add the server to the client's MCP settings; it gives the agent four tools: seal_answer, seal_hashes, verify_record and get_evidence.",
+  mcpNote: "Without a key, anonymous demo limits apply. Agents and tools can also read the API description at /llms.txt and /openapi.json.",
   hashTitle: "Keep private content in your infrastructure",
   hashText:
     "Send only locally computed SHA-256 fingerprints. Keep the original bytes and salt so you can prove the content later.",
@@ -214,6 +217,9 @@ const ru: Copy = {
     "Установите preview SDK",
     "Запишите и проверьте результат",
   ],
+  mcpTitle: "Подключить ИИ-агента (MCP)",
+  mcpText: "Агенты в Claude, Cursor и других MCP-клиентах могут сами ставить печать на свои ответы, без кода. Добавьте сервер в настройки MCP клиента: агент получит четыре инструмента — seal_answer, seal_hashes, verify_record и get_evidence.",
+  mcpNote: "Без ключа действуют анонимные демо-лимиты. Описание API для агентов и инструментов: /llms.txt и /openapi.json.",
   hashTitle: "Содержимое остаётся в вашей инфраструктуре",
   hashText:
     "Отправляйте только SHA-256 отпечатки, рассчитанные локально. Сохраните исходные байты и соль для последующей проверки содержимого.",
@@ -328,6 +334,9 @@ const kk: Copy = {
     "Preview SDK орнатыңыз",
     "Нәтижені тіркеп, тексеріңіз",
   ],
+  mcpTitle: "AI агентін қосу (MCP)",
+  mcpText: "Claude, Cursor және басқа MCP клиенттеріндегі агенттер өз жауаптарына кодсыз мөр баса алады. Серверді клиенттің MCP баптауларына қосыңыз: агент төрт құрал алады — seal_answer, seal_hashes, verify_record және get_evidence.",
+  mcpNote: "Кілтсіз анонимді демо-лимиттер қолданылады. Агенттер мен құралдарға арналған API сипаттамасы: /llms.txt және /openapi.json.",
   hashTitle: "Жабық деректер өз инфрақұрылымыңызда қалады",
   hashText:
     "Жергілікті есептелген SHA-256 хэштерін ғана жіберіңіз. Кейін тексеру үшін бастапқы байттар мен тұзды сақтаңыз.",

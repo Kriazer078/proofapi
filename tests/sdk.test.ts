@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ProofAPI, ProofAPIError } from "../packages/sdk/src/index";
+import { ProofAPI, ProofAPIError, sha256Hex } from "../packages/sdk/src/index";
 const key = "pk_live_" + "a".repeat(48);
 describe("SDK HTTP contract", () => {
   it("sends a seal with a Bearer key and preserves pending chain errors", async () => {
@@ -54,6 +54,30 @@ describe("SDK HTTP contract", () => {
     ]);
     expect(fetcher.mock.calls[1][1].body).toBeUndefined();
   });
+  it("sends camelCase fingerprints in the documented wire format", async () => {
+    const fetcher = vi.fn().mockImplementation(async () => Response.json({ proof: {} }, { status: 201 }));
+    const sdk = new ProofAPI({ baseURL: "http://127.0.0.1:3000", fetch: fetcher });
+    await sdk.sealHashes({
+      inputHash: "a".repeat(64),
+      outputHash: "b".repeat(64),
+      metadataHash: "c".repeat(64),
+      agentId: "agent-1",
+    });
+    expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({
+      input_hash: "a".repeat(64),
+      output_hash: "b".repeat(64),
+      metadata_hash: "c".repeat(64),
+      agent_id: "agent-1",
+    });
+  });
+
+  it("hashes text the same way as Node crypto", async () => {
+    const { createHash } = await import("node:crypto");
+    expect(await sha256Hex("Привет, ProofAPI")).toBe(
+      createHash("sha256").update("Привет, ProofAPI").digest("hex"),
+    );
+  });
+
   it("returns typed auth/limit errors and never retries writes", async () => {
     const fetcher = vi
       .fn()

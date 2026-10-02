@@ -1,0 +1,32 @@
+# ProofAPI
+
+> ProofAPI seals AI answers on Solana. You send the input and the AI output (or only their SHA-256 fingerprints); ProofAPI records the fingerprints in its own Solana program as a numbered, hash-linked record and returns a public certificate link. Anyone with the link can check that the answer was not changed later, without an account or a crypto wallet.
+
+A seal proves the recorded data has not changed since sealing. It does not prove the AI answer is correct or which model actually ran (the model name is declared by the caller). Beta records are written to Solana devnet.
+
+## Use it
+
+- Base URL: https://proofapi.vercel.app
+- Auth: `Authorization: Bearer pk_live_…` (create a key at https://proofapi.vercel.app/console/keys). Without a key, anonymous demo limits per address apply.
+- Each write creates a new record. Do not retry a write that succeeded.
+- TypeScript SDK: `npm install proofapi`
+- MCP server for agents: `npx -y -p proofapi proofapi-mcp` (tools: seal_answer, seal_hashes, verify_record, get_evidence)
+
+## Endpoints
+
+- [POST /api/v1/seal](https://proofapi.vercel.app/openapi.json): body `{ "input": string, "output": string, "model"?: string, "label"?: string }` → 201 `{ id, status, sequence, certificateUrl, recordHash, inputHash, outputHash, chainError }`. `status` is `ANCHORED` when written to Solana, `PENDING_CHAIN` if the chain write is still pending.
+- POST /api/proofs/hashes: body `{ "input_hash", "output_hash", "metadata_hash" }` (64 lowercase hex each; camelCase also accepted), optional `agent_id`, `tool_name` → 201 `{ proof, chainError }`. Only fingerprints are sent; keep the original data and salt yourself.
+- GET /api/proofs/{id}/verify → `{ result: { status: "VERIFIED" | "FAILED" | "NOT_ON_CHAIN", checks } }`
+- GET /api/proofs/{id}/evidence → evidence pack (fingerprints, salt, Solana account) for independent verification.
+- Certificate page: https://proofapi.vercel.app/proof/{id}
+
+## Errors
+
+JSON `{ "error": string, "code"?: string }`. 400 invalid input, 401 invalid or revoked key (`invalid_key`), 404 unknown record, 429 limit reached, 503 temporarily unavailable.
+
+## More
+
+- [Developer guide](https://proofapi.vercel.app/developers)
+- [OpenAPI description](https://proofapi.vercel.app/openapi.json)
+- [Source code](https://github.com/Kriazer078/proofapi)
+- [Solana program on devnet](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)

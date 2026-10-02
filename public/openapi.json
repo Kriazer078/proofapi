@@ -1,0 +1,388 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ProofAPI",
+    "version": "1.0.0",
+    "description": "Seal AI answers on Solana and verify them later. A seal proves the recorded data has not changed; it does not prove the answer is correct. Beta records use Solana devnet."
+  },
+  "servers": [
+    {
+      "url": "https://proofapi.vercel.app"
+    }
+  ],
+  "security": [
+    {
+      "apiKey": []
+    },
+    {}
+  ],
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "pk_live_… key from /console/keys. Optional: without it anonymous demo limits apply."
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "SealRequest": {
+        "type": "object",
+        "required": [
+          "input",
+          "output"
+        ],
+        "properties": {
+          "input": {
+            "type": "string",
+            "description": "Prompt, request or document the answer is based on"
+          },
+          "output": {
+            "type": "string",
+            "description": "The AI answer to seal"
+          },
+          "model": {
+            "type": "string",
+            "description": "Declared model name"
+          },
+          "label": {
+            "type": "string",
+            "description": "Agent or workflow label"
+          }
+        }
+      },
+      "SealResult": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ANCHORED",
+              "PENDING_CHAIN"
+            ]
+          },
+          "sequence": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "certificateUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "recordHash": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "inputHash": {
+            "type": "string"
+          },
+          "outputHash": {
+            "type": "string"
+          },
+          "chainError": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "HashRequest": {
+        "type": "object",
+        "required": [
+          "input_hash",
+          "output_hash",
+          "metadata_hash"
+        ],
+        "properties": {
+          "input_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "output_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "metadata_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "agent_id": {
+            "type": "string"
+          },
+          "tool_name": {
+            "type": "string"
+          }
+        }
+      },
+      "Verification": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "VERIFIED",
+                  "FAILED",
+                  "NOT_ON_CHAIN"
+                ]
+              },
+              "checks": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/seal": {
+      "post": {
+        "operationId": "sealAnswer",
+        "summary": "Seal an AI answer",
+        "description": "Records fingerprints of the input, the answer and metadata on Solana. Each call creates a new record; do not retry a successful call.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SealRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sealed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SealResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/proofs/hashes": {
+      "post": {
+        "operationId": "sealHashes",
+        "summary": "Seal fingerprints only",
+        "description": "Send SHA-256 fingerprints instead of the data. camelCase field names are also accepted.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HashRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sealed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "proof": {
+                      "type": "object"
+                    },
+                    "chainError": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/proofs/{id}/verify": {
+      "get": {
+        "operationId": "verifyRecord",
+        "summary": "Verify a record against Solana",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Verification"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/proofs/{id}/evidence": {
+      "get": {
+        "operationId": "getEvidence",
+        "summary": "Evidence pack for independent verification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Evidence pack",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

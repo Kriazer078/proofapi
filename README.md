@@ -3,13 +3,14 @@
 [![CI](https://github.com/Kriazer078/proofapi/actions/workflows/ci.yml/badge.svg)](https://github.com/Kriazer078/proofapi/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-14F195.svg)](LICENSE)
 [![Solana](https://img.shields.io/badge/Solana-devnet-9945FF)](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
+[![npm](https://img.shields.io/npm/v/proofapi?color=14F195)](https://www.npmjs.com/package/proofapi)
 [![Hackathon](https://img.shields.io/badge/Colosseum-2026-14F195)](https://colosseum.org)
 
-ProofAPI puts a digital seal on an AI result. The input, the AI output and the settings are fingerprinted, and the fingerprints are recorded by our own Solana program in a numbered, hash-linked history. Anyone with the link can check that nothing was changed, with no account and no crypto wallet.
+> ProofAPI puts a digital seal on every AI answer. The input, the answer and the settings are fingerprinted and recorded by our own Solana program. Anyone with the link can check that nothing was changed — no account, no crypto wallet.
 
-Developer onboarding is available at `/developers`: sign in at `/signin`, create a server API key in `/console/keys`, and test a request in `/console/playground`. The console shows account records and monthly usage. Configure `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` for GitHub sign-in. `AUTH_DEV_LOGIN=1` enables a local development account only; it is ignored in production.
+[Live Demo](https://proofapi.vercel.app) · [Video Walkthrough](#resources) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [Colosseum Submission](#resources)
 
-The TypeScript SDK is on npm: `npm install proofapi`. See [SDK documentation](packages/sdk/README.md). Store `PROOFAPI_API_KEY` only on your server. Use `seal()` after receiving your AI provider's response, `sealHashes()` for fingerprints only, and `verify()` / `evidence()` to inspect the record. Local integration tests use a memory chain; they do not establish live Solana availability.
+---
 
 ![ProofAPI home page](assets/home.png)
 
@@ -19,65 +20,61 @@ The TypeScript SDK is on npm: `npm install proofapi`. See [SDK documentation](pa
 
 | Name | Role | Contact |
 |------|------|---------|
-| [Name] | [Role] | [Contact] |
+| Bekarys | CEO | — |
+| Nurdaulet | CTO | [GitHub](https://github.com/Kriazer078) |
+
+All code in this repository was written during the hackathon (first commit on 30 September 2026). It uses open-source libraries listed under [Tech Stack](#tech-stack).
 
 ---
 
 ## Problem and Solution
 
 ### 1. AI answers can be edited after the fact
-
-A consultant sends a client an AI contract review. Later the risk score in that review is lowered, and nobody can prove what the AI actually said.
-
-**Solution:** at the moment of the AI call, ProofAPI records SHA-256 fingerprints of the input, the output and the metadata on Solana. Changing one character later makes the certificate turn red.
+- **Problem:** A team sends a client an AI contract review or an agent makes a refund decision. Later the answer is changed, and nobody can prove what the AI actually said.
+- **ProofAPI:** At the moment of the AI call, SHA-256 fingerprints of the input, the answer and the metadata are recorded on Solana. Change one character later and the certificate turns red.
 
 ### 2. Logs don't convince outsiders
-
-Server logs and hash chains kept by the company can be rewritten by the same company.
-
-**Solution:** the history lives in a public Solana program. Its rules (sequence numbers, hash links, the issuer's signing key) are enforced on-chain, and the time comes from the Solana clock.
+- **Problem:** Server logs and hash chains kept by the company can be rewritten by the same company.
+- **ProofAPI:** The history lives in a public Solana program. Sequence numbers, hash links and the issuer's signing key are enforced on-chain, and the time comes from the Solana clock.
 
 ### 3. Inconvenient records can be deleted quietly
-
-If a record is removed from the operator's database, a normal log simply has a gap nobody notices.
-
-**Solution:** every record is numbered and linked to the previous one. The history audit walks the chain on Solana and flags any record that is missing from, or different in, the database.
+- **Problem:** If a record is removed from the operator's database, a normal log simply has a gap nobody notices.
+- **ProofAPI:** Every record is numbered and linked to the previous one. The history audit walks the chain on Solana and flags any record that is missing or different.
 
 ### 4. Documents are private
-
-Clients' contracts can't be published on a blockchain.
-
-**Solution:** only salted fingerprints go on-chain. The document stays with its owner, and a per-proof 32-byte salt prevents guessing short outputs.
+- **Problem:** Client contracts and user data can't be published on a blockchain.
+- **ProofAPI:** Only salted fingerprints go on-chain. In hash-only mode the data never leaves your servers.
 
 | Genuine | After someone edits the AI answer |
 |---|---|
 | ![Genuine certificate](assets/certificate-genuine.png) | ![Changed certificate](assets/certificate-changed.png) |
 
-**What a certificate does not prove:** that the AI answer is correct, or which model really ran (the model is declared by the issuer). It proves the recorded data hasn't changed since it was sealed.
+**What a certificate does not prove:** that the AI answer is correct, or which model really ran (the model is declared by the caller). It proves the recorded data hasn't changed since it was sealed.
 
 ---
 
 ## Why Solana
 
-- **Rules enforced by a program, not by us.** Sequence numbers, the hash chain and the issuer's writer key are checked on-chain, so the operator can't rewrite its own history.
-- **Cheap, fast records.** One record is a 233-byte account; rent is about 0.0025 SOL and confirmation takes seconds.
-- **Trusted time.** Timestamps come from the Solana `Clock`, so records can't be back-dated.
-- **Anyone can verify.** Verification reads public accounts from any RPC endpoint, without our servers.
+- **Rules enforced by a program, not by us** — sequence numbers, the hash chain and the writer key are checked on-chain, so the operator can't rewrite its own history.
+- **Cheap, fast records** — one record is a 233-byte account (about 0.0025 SOL rent) and confirms in seconds, so every AI answer can be sealed.
+- **Trusted time** — timestamps come from the Solana `Clock`, so records can't be back-dated.
+- **Anyone can verify** — verification reads public accounts from any RPC endpoint, without our servers.
 
 ---
 
 ## Summary of Features
 
-- Upload a PDF or TXT, get an AI contract review and a sealed certificate link
-- Plain-language certificate page: **Genuine** or **Changed**, with four simple checks
-- Hash-only mode: send fingerprints through the API, keep the data at home
+- **For developers:** `POST /api/v1/seal` with API keys, TypeScript SDK on npm (`npm install proofapi`), playground, console with keys, usage and records
+- **For AI agents:** MCP server (`proofapi-mcp`) with `seal_answer`, `seal_hashes`, `verify_record` and `get_evidence`; machine-readable [`llms.txt`](https://proofapi.vercel.app/llms.txt) and [`openapi.json`](https://proofapi.vercel.app/openapi.json)
+- **For recipients:** plain-language certificate page — **Genuine** or **Changed**, with four simple checks
+- Hash-only mode: send fingerprints only, keep the data at home
 - History audit that finds deleted, edited and unlinked records
 - Evidence pack (JSON) and a standalone [`verifier.html`](public/verifier.html) that checks it against Solana directly
-- Demo controls for presentations (edit, restore, delete), allowed only for the browser that created the certificate
+- Document review with Google Gemini: upload a PDF or TXT, get an AI risk review and a sealed certificate
+- GitHub sign-in, per-account monthly limits, per-address limits for anonymous use
 - English, Russian and Kazakh interface
-- Upload limits per address and per day to protect the server wallet
 
-![API guide for developers](assets/developers.png)
+![Developer guide](assets/developers.png)
 
 ---
 
@@ -85,27 +82,30 @@ Clients' contracts can't be published on a blockchain.
 
 | Layer | Technology |
 |-------|-----------|
-| On-chain program | Rust, Anchor (built and deployed with Solana Playground) |
-| Chain client | TypeScript, `@solana/web3.js` v1, hand-written Anchor encoding |
-| Web app and API | Next.js 15 (App Router), React 19, Tailwind CSS 4 |
-| Database | Prisma 6, SQLite locally, Postgres (Neon) when hosted |
-| Independent verifier | Single HTML file, WebCrypto, Solana JSON-RPC |
-| Testing | Vitest (118 tests), byte-level fake of the program, devnet end-to-end script |
-| AI | Google Gemini (`gemini-3.5-flash-lite`, structured JSON output, 30k-character cap, answer cache) when `GEMINI_API_KEY` is set; deterministic mock otherwise |
+| On-chain program | Rust · Anchor (built and deployed with Solana Playground) |
+| Chain client | TypeScript · `@solana/web3.js` v1 · hand-written Anchor encoding |
+| Web app and API | Next.js 15 (App Router) · React 19 · Tailwind CSS 4 · shadcn/ui (Base UI) |
+| Auth | Auth.js (NextAuth) with GitHub · hashed API keys |
+| Database | Prisma 6 · SQLite locally · Postgres (Neon) in production |
+| SDK and MCP | TypeScript ESM package [`proofapi`](https://www.npmjs.com/package/proofapi) · Model Context Protocol SDK |
+| AI | Google Gemini (`gemini-3.5-flash-lite`, structured output); deterministic mock without a key |
+| Independent verifier | Single HTML file · WebCrypto · Solana JSON-RPC |
+| Testing | Vitest (135 tests) · byte-level fake of the program · devnet end-to-end script · GitHub Actions |
+| Hosting | Vercel (fra1) |
 
 ---
 
 ## Architecture
 
 ```
- Browser / API client
-        │  upload document (or send hashes only)
+ AI agent (MCP) · SDK · HTTP API · Browser
+        │  input + answer (or fingerprints only)
         ▼
  ┌─────────────────────────── Next.js app ───────────────────────────┐
- │ extract text → AI review → canonical JSON → salted SHA-256 x3     │
+ │ API key / session → limits → canonical JSON → salted SHA-256 x3   │
  │ (input, output, metadata)                                         │
  │                                                                   │
- │ Postgres: document, AI output, salt          ProofService         │
+ │ Postgres: users, API keys, records, salt         ProofService     │
  └───────────────────────────────────┬───────────────────────────────┘
                                      │ create_proof(proof_id, 3 hashes)
                                      ▼
@@ -129,6 +129,36 @@ Clients' contracts can't be published on a blockchain.
 
 ## Quick Start
 
+### Use the hosted API
+
+```bash
+npm install proofapi
+```
+
+```ts
+import { ProofAPI } from 'proofapi';
+
+const proofapi = new ProofAPI({ apiKey: process.env.PROOFAPI_API_KEY }); // key from /console/keys
+const record = await proofapi.seal({ input: prompt, output: answer, model: 'your-model' });
+console.log(record.certificateUrl); // share this link
+```
+
+Connect an AI agent through MCP (Claude, Cursor and other clients):
+
+```json
+{
+  "mcpServers": {
+    "proofapi": {
+      "command": "npx",
+      "args": ["-y", "-p", "proofapi", "proofapi-mcp"],
+      "env": { "PROOFAPI_API_KEY": "pk_live_..." }
+    }
+  }
+}
+```
+
+### Run it locally
+
 **Prerequisites:** Node.js 20+. No Rust toolchain is needed: the program is built in [Solana Playground](https://beta.solpg.io).
 
 ```bash
@@ -141,7 +171,7 @@ npm test
 npm run dev
 ```
 
-Open http://localhost:3000. By default `CHAIN_MODE=memory` runs a local simulation of the program.
+Open http://localhost:3000. By default `CHAIN_MODE=memory` runs a local simulation of the program. Set `AUTH_DEV_LOGIN=1` to try the console without a GitHub app (ignored in production).
 
 **On Solana devnet:**
 
@@ -154,24 +184,34 @@ npm run chain:status
 npm run e2e:devnet       # create, verify, tamper, audit, and write an evidence pack
 ```
 
+**Production settings:** `GEMINI_API_KEY` for AI review, `AUTH_GITHUB_ID` and `AUTH_GITHUB_SECRET` for GitHub sign-in (callback `/api/auth/callback/github`). The sign-in secret is derived from `IP_HASH_SALT` unless `AUTH_SECRET` is set.
+
 ---
 
 ## Roadmap
 
-- **Now (MVP):** own Solana program, certificates, history audit, independent verifier, three languages
-- **Next:** more AI providers (OpenAI, Anthropic) behind the same interface; API keys; TypeScript and Python SDK with client-side hashing
-- **Then:** batching many proofs into one account (Merkle root) to cut cost; zkTLS proof that an output came from the AI provider's API
-- **Later:** qualified eIDAS timestamps on top of the record hash; mainnet deployment after a security review
+- [x] Own Solana program with numbered, hash-linked records
+- [x] Certificates, history audit and independent offline verifier
+- [x] Hash-only mode for private data
+- [x] API keys, developer console and GitHub sign-in
+- [x] TypeScript SDK on npm and MCP server for AI agents
+- [x] AI document review with Google Gemini
+- [ ] Python SDK and more AI providers (OpenAI, Anthropic) behind the same interface
+- [ ] Batching many records into one account (Merkle root) to cut cost
+- [ ] zkTLS proof that an answer came from the AI provider's API
+- [ ] Qualified eIDAS timestamps on top of the record hash
+- [ ] Mainnet deployment after a security review
 
 ---
 
 ## Resources
 
-- Live app: https://proofapi.vercel.app
-- Demo video: _coming soon_
-- Presentation: _coming soon_
-- Program on Solana Explorer: [devnet](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
-- Design spec: [`docs/superpowers/specs/2026-09-30-proofapi-mvp-design.md`](docs/superpowers/specs/2026-09-30-proofapi-mvp-design.md)
+- [Live Application](https://proofapi.vercel.app)
+- [Developer Docs](https://proofapi.vercel.app/developers)
+- [npm package](https://www.npmjs.com/package/proofapi)
+- [Program on Solana Explorer (devnet)](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
+- Project Presentation — _coming soon_
+- Video Demo — _coming soon_
 
 ---
 

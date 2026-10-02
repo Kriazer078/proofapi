@@ -12,14 +12,21 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body) throw new ValidationError("Send a JSON body with input_hash, output_hash and metadata_hash");
-    const str = (key: string) => (typeof body[key] === "string" ? (body[key] as string) : "");
+    // snake_case is the documented form; camelCase matches the SDK and the rest of the API.
+    const str = (key: string, alt: string) => {
+      const value = body[key] ?? body[alt];
+      return typeof value === "string" ? value : "";
+    };
     const { proofs, chain, access, accounts } = getServices();
     const who = await admitUpload(access, await resolveCaller(accounts));
     const { proof, chainError } = await proofs.createHashOnlyProof({
-      inputHash: str("input_hash"),
-      outputHash: str("output_hash"),
-      metadataHash: str("metadata_hash"),
-      agent: { agentId: str("agent_id") || undefined, toolName: str("tool_name") || undefined },
+      inputHash: str("input_hash", "inputHash"),
+      outputHash: str("output_hash", "outputHash"),
+      metadataHash: str("metadata_hash", "metadataHash"),
+      agent: {
+        agentId: str("agent_id", "agentId") || undefined,
+        toolName: str("tool_name", "toolName") || undefined,
+      },
     });
     await access.record({ proofId: proof.id, ...who, createdAt: new Date() });
     return NextResponse.json({ proof: toPublicProof(proof, chain), chainError }, { status: 201 });

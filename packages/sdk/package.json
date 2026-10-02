@@ -1,15 +1,17 @@
 {
   "name": "proofapi",
-  "version": "0.1.0",
-  "description": "TypeScript client for sealing and verifying AI results with ProofAPI",
+  "version": "0.2.0",
+  "description": "Seal and verify AI answers on Solana with ProofAPI. TypeScript client and MCP server for AI agents.",
   "keywords": [
+    "agents",
     "ai",
     "audit",
+    "llm",
+    "mcp",
+    "model-context-protocol",
     "proof",
     "solana",
-    "verification",
-    "llm",
-    "agents"
+    "verification"
   ],
   "homepage": "https://proofapi.vercel.app/developers",
   "repository": {
@@ -21,6 +23,9 @@
   "type": "module",
   "engines": {
     "node": ">=20"
+  },
+  "bin": {
+    "proofapi-mcp": "dist/mcp.js"
   },
   "exports": {
     ".": {
@@ -36,6 +41,14 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3"
   },
   "publishConfig": {
     "access": "public"
