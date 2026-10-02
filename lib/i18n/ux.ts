@@ -17,7 +17,7 @@ const en = {
   skip: "Skip to content",
   navigation: "Product navigation",
   home: "Overview",
-  contact: "Contact on GitHub",
+  contact: "Email us",
   unavailable: "Verification unavailable",
   unavailableText:
     "We couldn't reach the verification service. No conclusion about integrity has been made. Try again.",
@@ -98,7 +98,7 @@ const ru: Copy = {
   skip: "Перейти к содержимому",
   navigation: "Навигация продукта",
   home: "Обзор",
-  contact: "Написать на GitHub",
+  contact: "Написать нам",
   unavailable: "Проверка недоступна",
   unavailableText:
     "Не удалось связаться с сервисом проверки. Вывод о целостности не сделан. Повторите попытку.",
@@ -178,7 +178,7 @@ const kk: Copy = {
   skip: "Мазмұнға өту",
   navigation: "Өнім навигациясы",
   home: "Шолу",
-  contact: "GitHub-та жазу",
+  contact: "Бізге жазу",
   unavailable: "Тексеру қолжетімсіз",
   unavailableText:
     "Тексеру қызметіне қосылу мүмкін болмады. Тұтастық туралы қорытынды жасалған жоқ. Қайта көріңіз.",

@@ -1,3 +1,4 @@
+import type React from "react";
 import { Check } from "lucide-react";
 import type { HeroCopy } from "@/lib/i18n/hero";
 
@@ -29,10 +30,22 @@ export function HeroShot({ copy }: { copy: HeroCopy["shot"] }) {
           <div className="grid gap-x-10 md:grid-cols-[1.15fr_0.85fr]">
             <div>
               <div className="mt-6 flex items-center gap-4 border-b pb-6">
-                <div className="grid size-14 shrink-0 place-items-center rounded-full bg-success-soft">
-                  <Check className="size-6 text-success" strokeWidth={2.5} />
-                </div>
-                <div>
+                <svg
+                  className="verify-ring size-14 shrink-0"
+                  viewBox="0 0 52 52"
+                  fill="none"
+                >
+                  <circle cx="26" cy="26" r="24" strokeWidth="2" className="stroke-border" />
+                  <circle cx="26" cy="26" r="24" strokeWidth="2.5" strokeLinecap="round" className="arc stroke-success" />
+                  <path
+                    d="M17 26.5l6 6 12-13"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="tick stroke-success"
+                  />
+                </svg>
+                <div className="verify-verdict">
                   <p className="text-[30px] font-semibold leading-tight tracking-[-0.03em]">
                     {copy.verdict}
                   </p>
@@ -51,9 +64,15 @@ export function HeroShot({ copy }: { copy: HeroCopy["shot"] }) {
               </dl>
             </div>
             <ul className="grid content-start gap-3 py-5 text-sm md:pt-[30px]">
-              {copy.checks.map((check) => (
+              {copy.checks.map((check, i) => (
                 <li key={check} className="flex items-center gap-2.5">
-                  <Check className="size-4 shrink-0 text-success" strokeWidth={2.25} />
+                  <span
+                    className="verify-step"
+                    style={{ "--d": `${1.2 + i * 0.3}s` } as React.CSSProperties}
+                  >
+                    <span className="spinner" />
+                    <Check className="done size-4 text-success" strokeWidth={2.25} />
+                  </span>
                   {check}
                 </li>
               ))}

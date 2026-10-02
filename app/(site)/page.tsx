@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+import type React from "react";
 import { Check } from "lucide-react";
 import { DEV } from "@/lib/i18n/developer";
 import { Icon, LinkButton } from "@/components/primitives";
@@ -6,6 +8,8 @@ import { getMessages } from "@/lib/i18n/server";
 import { UX } from "@/lib/i18n/ux";
 import { HERO } from "@/lib/i18n/hero";
 import { HeroShot } from "@/components/site/hero-shot";
+import { LiveChain } from "@/components/site/live-chain";
+import { TamperPreview } from "@/components/site/tamper-preview";
 
 export default async function HomePage() {
   const { t, locale } = await getMessages();
@@ -17,30 +21,65 @@ export default async function HomePage() {
     <>
       <section className="landing-hero pt-16 text-center sm:pt-24">
         <h1 className="landing-title mx-auto">
-          {h.title[0]}
-          <br />
-          {h.title[1]}
+          {h.title.map((line, l) => (
+            <span key={line} className="block">
+              {line.split(" ").map((word, w) => (
+                <Fragment key={w}>
+                  {w > 0 && " "}
+                  <span
+                    className="hero-word"
+                    style={{ "--i": l * 3 + w } as React.CSSProperties}
+                  >
+                    {word}
+                  </span>
+                </Fragment>
+              ))}
+            </span>
+          ))}
         </h1>
-        <p className="mx-auto mt-6 max-w-[600px] text-[17px] leading-[1.6] text-text-secondary sm:text-[19px]">
+        <p className="hero-sub mx-auto mt-6 max-w-[600px] text-[17px] leading-[1.6] text-text-secondary sm:text-[19px]">
           {h.sub}
         </p>
         <div className="mt-9 flex flex-wrap justify-center gap-3">
-          <LinkButton
-            href="/console/keys"
-            variant="primary"
-            className="h-11 rounded-full px-5 text-[15px]"
-          >
-            {h.start}
-          </LinkButton>
-          <LinkButton
-            href={CONTACT_URL}
-            external
-            className="h-11 rounded-full px-5 text-[15px]"
-          >
-            {h.demo}
-          </LinkButton>
+          <span className="hero-cta" style={{ "--i": 0 } as React.CSSProperties}>
+            <LinkButton
+              href="/console/keys"
+              variant="primary"
+              className="h-11 rounded-full px-5 text-[15px]"
+            >
+              {h.start}
+              <Icon name="arrow" />
+            </LinkButton>
+          </span>
+          <span className="hero-cta" style={{ "--i": 1 } as React.CSSProperties}>
+            <LinkButton
+              href={CONTACT_URL}
+              external
+              className="h-11 rounded-full px-5 text-[15px]"
+            >
+              {h.demo}
+            </LinkButton>
+          </span>
         </div>
         <HeroShot copy={h.shot} />
+      </section>
+      <section className="grid items-center gap-10 border-t py-12 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-16">
+        <div>
+          <h2 className="section-title">{h.tamper.title}</h2>
+          <p className="page-intro">{h.tamper.text}</p>
+        </div>
+        <TamperPreview copy={h.tamper} shot={h.shot} />
+      </section>
+      <section className="border-t py-12 sm:py-16">
+        <h2 className="section-title">{h.chain.title}</h2>
+        <p className="page-intro">{h.chain.text}</p>
+        <div className="mt-6">
+          <LiveChain
+            example={h.chain.example}
+            pause={h.chain.pause}
+            resume={h.chain.resume}
+          />
+        </div>
       </section>
       <section id="how" className="border-t py-10 sm:py-16">
         <h2 className="section-title">

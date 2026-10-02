@@ -29,3 +29,19 @@ export const MCP_CONFIG = `{
     }
   }
 }`;
+
+export const CURL_EXAMPLE = `curl https://proofapi.vercel.app/api/v1/seal \\
+  -H "Authorization: Bearer $PROOFAPI_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"input":"Classify support ticket #42","output":"billing","model":"your-model"}'`;
+
+export const PYTHON_EXAMPLE = `import os, requests
+
+record = requests.post(
+    "https://proofapi.vercel.app/api/v1/seal",
+    headers={"Authorization": f"Bearer {os.environ['PROOFAPI_API_KEY']}"},
+    json={"input": "Classify support ticket #42", "output": "billing", "model": "your-model"},
+    timeout=65,
+).json()
+
+print(record["status"], record["certificateUrl"])`;

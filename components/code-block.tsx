@@ -34,7 +34,11 @@ export function CodeBlock({
           {label ?? "bash"}
         </span>
         <Button variant="ghost" size="sm" onClick={copy}>
-          <Icon name={copied ? "check" : "copy"} />
+          {copied ? (
+            <Icon name="check" className="pop-in size-4 text-success" />
+          ) : (
+            <Icon name="copy" />
+          )}
           {copied ? copiedLabel : copyLabel}
         </Button>
       </div>

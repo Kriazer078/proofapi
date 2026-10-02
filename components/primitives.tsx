@@ -55,7 +55,7 @@ export function LinkButton({
         data-slot="button"
         className={cls}
         href={href}
-        target="_blank"
+        target={href.startsWith("mailto:") ? undefined : "_blank"}
         rel="noreferrer"
       >
         {children}

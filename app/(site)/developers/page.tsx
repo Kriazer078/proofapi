@@ -1,9 +1,12 @@
 import { CodeBlock } from "@/components/code-block";
+import { CodeTabs } from "@/components/code-tabs";
 import { LinkButton } from "@/components/primitives";
 import { getMessages } from "@/lib/i18n/server";
 import { DEV } from "@/lib/i18n/developer";
 import {
+  CURL_EXAMPLE,
   MCP_CONFIG,
+  PYTHON_EXAMPLE,
   SDK_INSTALL,
   SEAL_EXAMPLE,
   VERIFY_EXAMPLE,
@@ -80,7 +83,18 @@ export default async function DevelopersPage() {
           <section id="request" className="border-t pt-8">
             <h2 className="section-title">3. {d.requestStep}</h2>
             <p className="page-intro">{d.requestStepText}</p>
-            <div className="mt-4">{code(SEAL_EXAMPLE, "TypeScript")}</div>
+            <div className="mt-4">
+              <CodeTabs
+                label={d.requestStep}
+                copyLabel={d.copy}
+                copiedLabel={d.copied}
+                tabs={[
+                  { id: "ts", title: "TypeScript", code: SEAL_EXAMPLE },
+                  { id: "py", title: "Python", code: PYTHON_EXAMPLE },
+                  { id: "curl", title: "cURL", code: CURL_EXAMPLE },
+                ]}
+              />
+            </div>
             <p className="mt-3 text-xs leading-5 text-text-muted">
               {d.privacy}
             </p>

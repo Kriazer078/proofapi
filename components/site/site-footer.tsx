@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { getChainMode } from "@/lib/config";
-import { CONTACT_URL, GITHUB_URL } from "@/lib/i18n/marketing";
+import { CONTACT_URL, GITHUB_URL, X_URL } from "@/lib/i18n/marketing";
 import { getMessages } from "@/lib/i18n/server";
 
 export async function SiteFooter() {
@@ -14,6 +14,7 @@ export async function SiteFooter() {
     { href: "/#pricing", label: f.pricing },
     { href: CONTACT_URL, label: f.contact, external: true },
     { href: GITHUB_URL, label: f.github, external: true },
+    { href: X_URL, label: "X", external: true },
     { href: "/privacy", label: f.privacy },
     { href: "/terms", label: f.terms },
   ];
@@ -33,7 +34,7 @@ export async function SiteFooter() {
               <a
                 key={l.href}
                 href={l.href}
-                target="_blank"
+                target={l.href.startsWith("mailto:") ? undefined : "_blank"}
                 rel="noreferrer"
                 className="transition-colors hover:text-foreground"
               >

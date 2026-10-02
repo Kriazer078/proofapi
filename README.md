@@ -8,7 +8,7 @@
 
 > ProofAPI puts a digital seal on every AI answer. The input, the answer and the settings are fingerprinted and recorded by our own Solana program. Anyone with the link can check that nothing was changed — no account, no crypto wallet.
 
-[Live Demo](https://proofapi.vercel.app) · [Video Walkthrough](#resources) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [Colosseum Submission](#resources)
+[Live Demo](https://proofapi.vercel.app) · [Video Walkthrough](#resources) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [X](https://x.com/ProofAPI) · [Colosseum Submission](#resources)
 
 ---
 
@@ -20,7 +20,7 @@
 
 | Name | Role | Contact |
 |------|------|---------|
-| Bekarys | CEO | — |
+| Bekarys | CEO | [proofapiofficial@gmail.com](mailto:proofapiofficial@gmail.com) · [X](https://x.com/ProofAPI) |
 | Nurdaulet | CTO | [GitHub](https://github.com/Kriazer078) |
 
 All code in this repository was written during the hackathon (first commit on 30 September 2026). It uses open-source libraries listed under [Tech Stack](#tech-stack).
@@ -209,6 +209,8 @@ npm run e2e:devnet       # create, verify, tamper, audit, and write an evidence 
 - [Live Application](https://proofapi.vercel.app)
 - [Developer Docs](https://proofapi.vercel.app/developers)
 - [npm package](https://www.npmjs.com/package/proofapi)
+- [X / Twitter](https://x.com/ProofAPI)
+- Contact: [proofapiofficial@gmail.com](mailto:proofapiofficial@gmail.com)
 - [Program on Solana Explorer (devnet)](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
 - Project Presentation — _coming soon_
 - Video Demo — _coming soon_

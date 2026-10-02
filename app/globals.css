@@ -209,6 +209,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
@@ -262,3 +263,61 @@
     font-size: 24px;
   }
 }
+
+/* Motion. One easing family; entrances ease out, nothing bounces.
+   Reduced motion is handled above: every animation jumps to its final frame. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes pa-rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@keyframes pa-lift {
+  from { opacity: 0; transform: translateY(28px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pa-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pa-pop {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pa-draw { to { stroke-dashoffset: 0; } }
+@keyframes pa-turn { to { transform: rotate(360deg); } }
+@keyframes pa-out { to { opacity: 0; visibility: hidden; } }
+@keyframes pa-enter-right {
+  from { opacity: 0; transform: translateX(16px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pa-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes pa-breathe { 50% { opacity: 0.35; } }
+
+/* A. Home hero entrance: words, then text, then actions, then the product shot. */
+.hero-word { display: inline-block; animation: pa-rise 0.7s var(--ease-out) both; animation-delay: calc(var(--i) * 55ms); }
+.hero-sub { animation: pa-rise 0.6s var(--ease-out) both 0.38s; }
+.hero-cta { animation: pa-rise 0.55s var(--ease-out) both; animation-delay: calc(0.5s + var(--i) * 70ms); }
+.hero-stage { animation: pa-lift 0.9s var(--ease-out) both 0.62s; }
+
+/* B. Verification sequence on the certificate preview. */
+.verify-ring .arc { stroke-dasharray: 151; stroke-dashoffset: 151; transform: rotate(-90deg); transform-origin: 50% 50%; animation: pa-draw 1.2s var(--ease-out) forwards 1.1s; }
+.verify-ring .tick { stroke-dasharray: 30; stroke-dashoffset: 30; animation: pa-draw 0.35s var(--ease-out) forwards 2.35s; }
+.verify-verdict { animation: pa-fade 0.4s var(--ease-out) both 2.4s; }
+.verify-step { position: relative; display: inline-grid; place-items: center; width: 16px; height: 16px; flex: 0 0 16px; }
+.verify-step .spinner { position: absolute; width: 13px; height: 13px; border-radius: 9999px; border: 2px solid var(--border-strong); border-top-color: var(--text-secondary); animation: pa-turn 0.6s linear infinite, pa-out 0s linear forwards; animation-delay: 0s, var(--d); }
+.verify-step .done { animation: pa-pop 0.3s var(--ease-out) both var(--d); }
+
+/* D. Live record chain. */
+.chain-mask { -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.chain-enter { animation: pa-enter-right 0.7s var(--ease-out) both 0.25s; }
+.chain-link-enter { transform-origin: left; animation: pa-grow 0.35s var(--ease-out) both; }
+.live-dot { animation: pa-breathe 2.4s ease-in-out infinite; }
+
+/* E. Feedback on interaction. */
+[data-slot="button"] { transition-property: color, background-color, border-color, box-shadow, transform; transition-duration: 150ms; transition-timing-function: var(--ease-out); }
+[data-slot="button"]:active:not(:disabled) { transform: scale(0.98); }
+[data-slot="button"] > svg.lucide-arrow-right { transition: transform 0.2s var(--ease-out); }
+[data-slot="button"]:hover > svg.lucide-arrow-right { transform: translateX(3px); }
+.pop-in { animation: pa-pop 0.25s var(--ease-out) both; }

@@ -1,7 +1,9 @@
 /** Copy for the commercial pages: pricing, developers, trust, contact, legal. Kept apart from product UI copy. */
 
 export const GITHUB_URL = "https://github.com/Kriazer078/proofapi";
-export const CONTACT_URL = "https://github.com/Kriazer078/proofapi/issues";
+export const CONTACT_EMAIL = "proofapiofficial@gmail.com";
+export const CONTACT_URL = `mailto:${CONTACT_EMAIL}`;
+export const X_URL = "https://x.com/ProofAPI";
 
 const en = {
   nav: { developers: "Developers", pricing: "Pricing" },
@@ -46,7 +48,7 @@ const en = {
       { name: "Enterprise", price: "Custom", items: ["Your own Solana signing key", "Hash-only mode for private data", "History audit export"], cta: "Contact us" },
     ],
   },
-  contact: { title: "Talk to us", text: "Questions, pilots or partnerships: open an issue on GitHub and we'll reply.", cta: "Write to us" },
+  contact: { title: "Talk to us", text: "Questions, pilots or partnerships: email proofapiofficial@gmail.com and we'll reply.", cta: "Write to us" },
   footer: {
     product: "Product",
     developers: "Developers",
@@ -125,7 +127,7 @@ const ru: Marketing = {
       { name: "Для компаний", price: "Договорная", items: ["Свой ключ подписи в Solana", "Режим «только отпечатки» для закрытых данных", "Выгрузка аудита журнала"], cta: "Связаться" },
     ],
   },
-  contact: { title: "Связаться с нами", text: "Вопросы, пилоты и партнёрства: напишите нам на GitHub, мы ответим.", cta: "Написать нам" },
+  contact: { title: "Связаться с нами", text: "Вопросы, пилоты и партнёрства: пишите на proofapiofficial@gmail.com, мы ответим.", cta: "Написать нам" },
   footer: {
     product: "Продукт",
     developers: "Разработчикам",
@@ -202,7 +204,7 @@ const kk: Marketing = {
       { name: "Компанияларға", price: "Келісім бойынша", items: ["Solana-дағы өз қолтаңба кілтіңіз", "Жабық деректерге «тек іздер» режимі", "Журнал аудитін жүктеу"], cta: "Хабарласу" },
     ],
   },
-  contact: { title: "Бізбен байланыс", text: "Сұрақтар, пилоттар және серіктестік: GitHub-та жазыңыз, біз жауап береміз.", cta: "Бізге жазу" },
+  contact: { title: "Бізбен байланыс", text: "Сұрақтар, пилоттар және серіктестік: proofapiofficial@gmail.com поштасына жазыңыз, біз жауап береміз.", cta: "Бізге жазу" },
   footer: {
     product: "Өнім",
     developers: "Әзірлеушілерге",
