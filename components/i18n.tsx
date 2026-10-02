@@ -2,7 +2,7 @@
 
 import { Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useTransition } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,10 +49,12 @@ export function LanguageSwitcher({
 }) {
   const { locale, t } = useI18n();
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
   function choose(next: string) {
+    if (next === locale) return;
     document.cookie = `lang=${next}; path=/; max-age=31536000; samesite=lax`;
-    router.refresh();
+    startTransition(() => router.refresh());
   }
 
   return (
@@ -60,12 +62,17 @@ export function LanguageSwitcher({
       <DropdownMenuTrigger
         data-slot="button"
         aria-label={t.nav.language}
+        aria-busy={pending}
         className={cn(
           "inline-flex h-9 items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground",
+          pending && "opacity-60",
           className,
         )}
       >
-        <Globe className="size-3.5" aria-hidden="true" />
+        <Globe
+          className={cn("size-3.5", pending && "animate-spin")}
+          aria-hidden="true"
+        />
         {SHORT[locale]}
       </DropdownMenuTrigger>
       <DropdownMenuContent

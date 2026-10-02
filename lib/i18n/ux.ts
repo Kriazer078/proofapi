@@ -25,6 +25,7 @@ const en = {
   missingText:
     "Check the full link. The record may be unavailable or removed from the database. An evidence file can still be checked independently.",
   loading: "Loading records…",
+  loadingPage: "Loading…",
   journalError: "The journal is unavailable",
   journalErrorText:
     "We couldn't load the history. Try again when the connection is restored.",
@@ -105,6 +106,7 @@ const ru: Copy = {
   missingText:
     "Проверьте полную ссылку. Запись может быть недоступна или удалена из базы. Файл-доказательство можно проверить независимо.",
   loading: "Загружаем записи…",
+  loadingPage: "Загрузка…",
   journalError: "Журнал недоступен",
   journalErrorText:
     "Не удалось загрузить историю. Повторите попытку после восстановления соединения.",
@@ -184,6 +186,7 @@ const kk: Copy = {
   missingText:
     "Толық сілтемені тексеріңіз. Жазба қолжетімсіз не дерекқордан жойылған болуы мүмкін. Дәлел файлын тәуелсіз тексеруге болады.",
   loading: "Жазбалар жүктелуде…",
+  loadingPage: "Жүктелуде…",
   journalError: "Журнал қолжетімсіз",
   journalErrorText:
     "Тарихты жүктеу мүмкін болмады. Байланыс қалпына келгенде қайталаңыз.",
