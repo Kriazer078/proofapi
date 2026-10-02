@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const BLOCK = 116;
@@ -27,15 +26,7 @@ function initial(): Item[] {
 }
 
 /** A slow, illustrative chain: a new linked record arrives every few seconds. Example data only. */
-export function LiveChain({
-  example,
-  pause,
-  resume,
-}: {
-  example: string;
-  pause: string;
-  resume: string;
-}) {
+export function LiveChain({ example }: { example: string }) {
   const [items, setItems] = useState(initial);
   const [offset, setOffset] = useState(0);
   const [ticked, setTicked] = useState(false);
@@ -135,20 +126,11 @@ export function LiveChain({
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-3 text-[12.5px] text-text-muted">
+      <div className="flex items-center text-[12.5px] text-text-muted">
         <span className="inline-flex items-center gap-2">
           <i className="live-dot block size-[7px] rounded-full bg-success" />
           {example}
         </span>
-        <Button
-          variant="outline"
-          size="sm"
-          className="rounded-full"
-          aria-pressed={paused}
-          onClick={() => setPaused(!paused)}
-        >
-          {paused ? resume : pause}
-        </Button>
       </div>
     </div>
   );

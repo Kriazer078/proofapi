@@ -27,8 +27,6 @@ const en = {
     title: "Records form a chain",
     text: "Each record stores the fingerprint of the one before it. Quietly deleting or replacing a record breaks the chain, and the history check shows where.",
     example: "Example, not live data",
-    pause: "Pause",
-    resume: "Resume",
   },
   shot: {
     alt: "Example certificate: the AI answer is genuine and all four checks pass.",
@@ -82,8 +80,6 @@ const ru: HeroCopy = {
     title: "Записи связаны в цепочку",
     text: "Каждая запись хранит отпечаток предыдущей. Тихо удалить или подменить одну не получится: цепочка разорвётся, и проверка истории покажет, где.",
     example: "Пример, данные не настоящие",
-    pause: "Пауза",
-    resume: "Продолжить",
   },
   shot: {
     alt: "Пример сертификата: ответ AI подлинный, все четыре проверки пройдены.",
@@ -135,8 +131,6 @@ const kk: HeroCopy = {
     title: "Жазбалар тізбекке байланған",
     text: "Әр жазба алдыңғысының ізін сақтайды. Бір жазбаны білдірмей өшіру не ауыстыру мүмкін емес: тізбек үзіледі, ал тарих тексеруі қай жерде екенін көрсетеді.",
     example: "Мысал, нақты деректер емес",
-    pause: "Кідірту",
-    resume: "Жалғастыру",
   },
   shot: {
     alt: "Сертификат мысалы: AI жауабы түпнұсқа, төрт тексеру де өтті.",

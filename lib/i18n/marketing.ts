@@ -2,7 +2,7 @@
 
 export const GITHUB_URL = "https://github.com/Kriazer078/proofapi";
 export const CONTACT_EMAIL = "proofapiofficial@gmail.com";
-export const CONTACT_URL = `mailto:${CONTACT_EMAIL}`;
+export const CONTACT_URL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("ProofAPI demo")}`;
 export const X_URL = "https://x.com/ProofAPI";
 
 const en = {

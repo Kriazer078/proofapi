@@ -74,11 +74,7 @@ export default async function HomePage() {
         <h2 className="section-title">{h.chain.title}</h2>
         <p className="page-intro">{h.chain.text}</p>
         <div className="mt-6">
-          <LiveChain
-            example={h.chain.example}
-            pause={h.chain.pause}
-            resume={h.chain.resume}
-          />
+          <LiveChain example={h.chain.example} />
         </div>
       </section>
       <section id="how" className="border-t py-10 sm:py-16">
