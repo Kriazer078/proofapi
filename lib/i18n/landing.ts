@@ -18,7 +18,7 @@ const en = {
         ["Decided by", "AI agent Claims Assist"],
         ["Decision", "Claim denied"],
         ["Reason", "Outside the coverage period"],
-        ["Model", "gemini-3.5-flash-lite"],
+        ["Model", "proofapi-review-v1"],
       ] as [string, string][],
     },
     cred: {
@@ -150,7 +150,7 @@ const ru: Landing = {
         ["Принял", "ИИ-агент Claims Assist"],
         ["Решение", "Отказ в выплате"],
         ["Основание", "Случай вне периода покрытия"],
-        ["Модель", "gemini-3.5-flash-lite"],
+        ["Модель", "proofapi-review-v1"],
       ],
     },
     cred: {
@@ -280,7 +280,7 @@ const kk: Landing = {
         ["Қабылдаған", "Claims Assist ЖИ-агенті"],
         ["Шешім", "Төлемнен бас тарту"],
         ["Негіздеме", "Жағдай өтеу кезеңінен тыс"],
-        ["Модель", "gemini-3.5-flash-lite"],
+        ["Модель", "proofapi-review-v1"],
       ],
     },
     cred: {

@@ -88,7 +88,7 @@ All code in this repository was written during the hackathon (first commit on 30
 | Auth | Auth.js (NextAuth) with GitHub · hashed API keys |
 | Database | Prisma 6 · SQLite locally · Postgres (Neon) in production |
 | SDK and MCP | TypeScript ESM package [`proofapi`](https://www.npmjs.com/package/proofapi) · Model Context Protocol SDK |
-| AI | Google Gemini (`gemini-3.5-flash-lite`, structured output); deterministic mock without a key |
+| AI | Google Gemini with structured output; deterministic mock without a key |
 | Independent verifier | Single HTML file · WebCrypto · Solana JSON-RPC |
 | Testing | Vitest (135 tests) · byte-level fake of the program · devnet end-to-end script · GitHub Actions |
 | Hosting | Vercel (fra1) |

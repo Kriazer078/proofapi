@@ -30,19 +30,25 @@ interface Options {
   fetch?: typeof fetch;
 }
 
+/** Name recorded in certificates instead of the underlying model, which is kept private. */
+export const PUBLIC_MODEL_LABEL = "proofapi-review-v1";
+
 /** Contract review by Google Gemini, with structured output, a size cap and a small cache for repeated documents. */
 export class GeminiProvider implements AIProvider {
   readonly name = "gemini";
-  readonly model: string;
+  /** Public label written into certificates. */
+  readonly model = PUBLIC_MODEL_LABEL;
+  /** The model actually called; never shown to users. */
+  readonly apiModel: string;
   private readonly cache = new Map<string, AnalysisResult>();
 
   constructor(private readonly o: Options) {
-    this.model = o.model;
+    this.apiModel = o.model;
   }
 
   async analyze(text: string): Promise<AnalysisResult> {
     const input = text.length > MAX_INPUT_CHARS ? `${text.slice(0, MAX_INPUT_CHARS)}\n[document truncated]` : text;
-    const key = createHash("sha256").update(`${this.model}\n${input}`).digest("hex");
+    const key = createHash("sha256").update(`${this.apiModel}\n${input}`).digest("hex");
     const cached = this.cache.get(key);
     if (cached) return cached;
 
@@ -56,7 +62,7 @@ export class GeminiProvider implements AIProvider {
     const doFetch = this.o.fetch ?? fetch;
     let res: Response;
     try {
-      res = await doFetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`, {
+      res = await doFetch(`https://generativelanguage.googleapis.com/v1beta/models/${this.apiModel}:generateContent`, {
         method: "POST",
         headers: { "content-type": "application/json", "x-goog-api-key": this.o.apiKey },
         body: JSON.stringify({

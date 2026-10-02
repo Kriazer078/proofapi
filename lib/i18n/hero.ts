@@ -38,7 +38,7 @@ const en = {
     verdictSub: "The answer has not changed since sealing · 1 October 2026, 12:04",
     facts: [
       ["Task", "Contract review"],
-      ["Model", "gemini-flash-lite"],
+      ["Fingerprint", "b7d2…19fa"],
       ["Network", "Solana devnet"],
       ["Issued by", "ProofAPI"],
     ],
@@ -93,7 +93,7 @@ const ru: HeroCopy = {
     verdictSub: "Ответ не менялся с момента печати · 1 октября 2026, 12:04",
     facts: [
       ["Задача", "Оценка договора"],
-      ["Модель", "gemini-flash-lite"],
+      ["Отпечаток", "b7d2…19fa"],
       ["Сеть", "Solana devnet"],
       ["Выдал", "ProofAPI"],
     ],
@@ -146,7 +146,7 @@ const kk: HeroCopy = {
     verdictSub: "Мөр басылғаннан бері жауап өзгермеген · 2026 жылғы 1 қазан, 12:04",
     facts: [
       ["Тапсырма", "Шартты бағалау"],
-      ["Модель", "gemini-flash-lite"],
+      ["Хэш", "b7d2…19fa"],
       ["Желі", "Solana devnet"],
       ["Берген", "ProofAPI"],
     ],

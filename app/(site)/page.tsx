@@ -125,7 +125,7 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
-      <section className="grid items-center gap-8 border-t py-10 sm:py-16 lg:grid-cols-2">
+      <section className="border-t py-10 sm:py-16">
         <div>
           <h2 className="section-title">
             {locale === "ru"
@@ -139,19 +139,6 @@ export default async function HomePage() {
             {t.mk.dev.teaserCta}
             <Icon name="arrow" />
           </LinkButton>
-        </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-surface p-6 text-sm">
-          <span>
-            {locale === "ru"
-              ? "Ваш сервер"
-              : locale === "kk"
-                ? "Сіздің серверіңіз"
-                : "Your server"}
-          </span>
-          <Icon name="arrow" />
-          <span className="font-mono text-text-secondary">SHA-256</span>
-          <Icon name="arrow" />
-          <span>ProofAPI</span>
         </div>
       </section>
       <section id="pricing" className="border-t py-10 sm:py-16">

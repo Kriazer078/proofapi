@@ -22,7 +22,8 @@ describe("GeminiProvider", () => {
     const result = await ai.analyze("Contract text");
     expect(result).toEqual({ riskScore: 42, issues: ["Termination clause", "Liability risk"], summary: "Uncapped liability." });
     expect(ai.name).toBe("gemini");
-    expect(ai.model).toBe("gemini-3.5-flash-lite");
+    expect(ai.apiModel).toBe("gemini-3.5-flash-lite");
+    expect(ai.model).toBe("proofapi-review-v1");
     expect(calls[0].url).toBe("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent");
     expect(calls[0].url).not.toContain("test-key");
     expect((calls[0].init.headers as Record<string, string>)["x-goog-api-key"]).toBe("test-key");
@@ -68,7 +69,7 @@ describe("createAIProvider", () => {
     expect(createAIProvider({}).name).toBe("mock");
     expect(createAIProvider({ GEMINI_API_KEY: "k" }).name).toBe("gemini");
     expect(createAIProvider({ GEMINI_API_KEY: "k", AI_PROVIDER: "mock" }).name).toBe("mock");
-    expect(createAIProvider({ GEMINI_API_KEY: "k", GEMINI_MODEL: "gemini-3.8-flash" }).model).toBe("gemini-3.8-flash");
-    expect(createAIProvider({ GEMINI_API_KEY: "k" }).model).toBe("gemini-3.5-flash-lite");
+    expect((createAIProvider({ GEMINI_API_KEY: "k", GEMINI_MODEL: "gemini-3.8-flash" }) as GeminiProvider).apiModel).toBe("gemini-3.8-flash");
+    expect((createAIProvider({ GEMINI_API_KEY: "k" }) as GeminiProvider).apiModel).toBe("gemini-3.5-flash-lite");
   });
 });
