@@ -1,3 +1,4 @@
+import { createHmac } from "node:crypto";
 import { type NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
@@ -31,9 +32,20 @@ if (devLoginEnabled()) {
   );
 }
 
+/**
+ * Session signing secret. An explicit AUTH_SECRET wins; otherwise it is derived from the existing
+ * server-only IP_HASH_SALT, so a deployment needs no extra secret just to enable sign-in.
+ */
+function authSecret(): string | undefined {
+  const explicit = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+  if (explicit) return explicit;
+  const salt = process.env.IP_HASH_SALT;
+  return salt ? createHmac("sha256", salt).update("proofapi-auth-session-v1").digest("hex") : undefined;
+}
+
 export const authOptions: NextAuthOptions = {
   providers,
-  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
+  secret: authSecret(),
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   pages: { signIn: "/signin" },
   callbacks: {
