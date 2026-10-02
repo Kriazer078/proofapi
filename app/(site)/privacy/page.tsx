@@ -1,9 +1,11 @@
-import { LegalPage } from "@/components/legal-page";
+import type { Metadata } from "next";
+import { LegalDocument } from "@/components/legal-document";
 import { getMessages } from "@/lib/i18n/server";
+import { PRIVACY } from "@/lib/i18n/privacy";
+
+export const metadata: Metadata = { title: "Privacy Policy" };
 
 export default async function PrivacyPage() {
-  const { t } = await getMessages();
-  return (
-    <LegalPage title={t.mk.legal.privacyTitle} points={t.mk.legal.privacy} />
-  );
+  const { locale } = await getMessages();
+  return <LegalDocument doc={PRIVACY[locale]} />;
 }
