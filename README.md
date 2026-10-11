@@ -8,7 +8,7 @@
 
 > ProofAPI puts a digital seal on every AI answer. The input, the answer and the settings are fingerprinted and recorded by our own Solana program. Anyone with the link can check that nothing was changed — no account, no crypto wallet.
 
-[Live Demo](https://proofapi.vercel.app) · [Video Demo](https://youtu.be/28qNhRNTmOw) · [Video Pitch](https://youtu.be/wEYngaGRzXQ) · [Presentation](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [X](https://x.com/ProofAPI)
+[Live Demo](https://proofapi.vercel.app) · [Video Demo](https://youtu.be/cAAvL5bqVEY?si=j6zqZFztvJrDmrBX) · [Video Pitch](https://youtu.be/GRqMKkLNNhc) · [Presentation](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing) · [Docs](https://proofapi.vercel.app/developers) · [npm](https://www.npmjs.com/package/proofapi) · [X](https://x.com/ProofAPI)
 
 ---
 
@@ -20,8 +20,16 @@
 
 | Name | Role | Contact |
 |------|------|---------|
-| Bekarys | CEO | [proofapiofficial@gmail.com](mailto:proofapiofficial@gmail.com) · [X](https://x.com/ProofAPI) |
+| Bekarys | CEO | [proofapiforsol@gmail.com](mailto:proofapiforsol@gmail.com) · [X](https://x.com/ProofAPI) |
 | Nurdaulet | CTO | [GitHub](https://github.com/Kriazer078) |
+
+| Submission material | Link |
+|---------------------|------|
+| Pitch video | [Watch the pitch](https://youtu.be/GRqMKkLNNhc) |
+| Product demo video | [Watch the demo](https://youtu.be/cAAvL5bqVEY?si=j6zqZFztvJrDmrBX) |
+| Live application | [proofapi.vercel.app](https://proofapi.vercel.app) |
+| Presentation | [Google Slides](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing) |
+| Contact email | [proofapiforsol@gmail.com](mailto:proofapiforsol@gmail.com) |
 
 All code in this repository was written during the hackathon (first commit on 30 September 2026). It uses open-source libraries listed under [Tech Stack](#tech-stack).
 
@@ -210,11 +218,11 @@ npm run e2e:devnet       # create, verify, tamper, audit, and write an evidence 
 - [Developer Docs](https://proofapi.vercel.app/developers)
 - [npm package](https://www.npmjs.com/package/proofapi)
 - [X / Twitter](https://x.com/ProofAPI)
-- Contact: [proofapiofficial@gmail.com](mailto:proofapiofficial@gmail.com)
+- Contact: [proofapiforsol@gmail.com](mailto:proofapiforsol@gmail.com)
 - [Program on Solana Explorer (devnet)](https://explorer.solana.com/address/5ffvduJkfxLgFiJEoZ9Pjq7oPVW1aKCgfqzmEto1FqjU?cluster=devnet)
 - [Project Presentation](https://docs.google.com/presentation/d/1-Se2ndcHqr1r1h6cGztOCznNtPXSQKX7F-yLTvZ3RvA/edit?usp=sharing)
-- [Video Demo](https://youtu.be/28qNhRNTmOw)
-- [Video Pitch](https://youtu.be/wEYngaGRzXQ)
+- [Video Demo](https://youtu.be/cAAvL5bqVEY?si=j6zqZFztvJrDmrBX)
+- [Video Pitch](https://youtu.be/GRqMKkLNNhc)
 
 ---
 
